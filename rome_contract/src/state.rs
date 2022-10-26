@@ -10,6 +10,7 @@ pub struct Config {
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Post {
+    pub editable: bool,
     //tracks specific posts through unique identifier
     pub post_id: u64,
     //title for FE searches

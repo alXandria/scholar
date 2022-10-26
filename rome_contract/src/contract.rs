@@ -54,11 +54,12 @@ pub fn execute(
 ) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::CreatePost {
+            editable,
             post_title,
             external_id,
             text,
             tags,
-        } => execute_create_post(deps, env, info, post_title, external_id, text, tags),
+        } => execute_create_post(deps, env, info, editable, post_title, external_id, text, tags),
         ExecuteMsg::EditPost {
             post_id,
             external_id,
@@ -75,6 +76,7 @@ fn execute_create_post(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
+    editable: bool,
     post_title: String,
     external_id: String,
     text: String,
@@ -95,6 +97,7 @@ fn execute_create_post(
     let author = info.sender.to_string();
     let validated_author = deps.api.addr_validate(&author)?;
     let post: Post = Post {
+        editable,
         post_id: incremented_id,
         post_title,
         external_id,
@@ -137,29 +140,66 @@ fn execute_edit_post(
     let post = POST.load(deps.storage, post_id)?;
     let editor = info.sender.to_string();
     let validated_editor = deps.api.addr_validate(&editor)?;
-    let new_post: Post = Post {
-        post_id: post.post_id,
-        post_title: post.post_title,
-        external_id,
-        text,
-        tags,
-        author: post.author,
-        creation_date: post.creation_date,
-        last_edit_date: Some(env.block.time.to_string()),
-        deleter: None,
-        editor: Some(validated_editor.to_string()),
-        deletion_date: None,
-    };
-    POST.save(deps.storage, post_id, &new_post)?;
-    let share = BankMsg::Send {
-        to_address: new_post.author,
-        amount: vec![coin(500_000, JUNO)],
-    };
-    Ok(Response::new()
-        .add_message(share)
-        .add_attribute("action", "edit_post")
-        .add_attribute("post_id", new_post.post_id.to_string())
-        .add_attribute("editor", new_post.editor.unwrap()))
+    let editable_post = post.editable;
+    match editable_post {
+        true => {
+            let new_post: Post = Post {
+                editable: post.editable,
+                post_id: post.post_id,
+                post_title: post.post_title,
+                external_id,
+                text,
+                tags,
+                author: post.author,
+                creation_date: post.creation_date,
+                last_edit_date: Some(env.block.time.to_string()),
+                deleter: None,
+                editor: Some(validated_editor.to_string()),
+                deletion_date: None,
+            };
+            POST.save(deps.storage, post_id, &new_post)?;
+            let share = BankMsg::Send {
+                to_address: new_post.author,
+                amount: vec![coin(500_000, JUNO)],
+            };
+            Ok(Response::new()
+                .add_message(share)
+                .add_attribute("action", "edit_post")
+                .add_attribute("post_id", new_post.post_id.to_string())
+                .add_attribute("editor", new_post.editor.unwrap()))
+        }
+        false => {
+            if info.sender == post.author {
+                let new_post: Post = Post {
+                    editable: post.editable,
+                    post_id: post.post_id,
+                    post_title: post.post_title,
+                    external_id,
+                    text,
+                    tags,
+                    author: post.author,
+                    creation_date: post.creation_date,
+                    last_edit_date: Some(env.block.time.to_string()),
+                    deleter: None,
+                    editor: Some(validated_editor.to_string()),
+                    deletion_date: None,
+                };
+                POST.save(deps.storage, post_id, &new_post)?;
+                let share = BankMsg::Send {
+                    to_address: new_post.author,
+                    amount: vec![coin(500_000, JUNO)],
+                };
+                Ok(Response::new()
+                    .add_message(share)
+                    .add_attribute("action", "edit_post")
+                    .add_attribute("post_id", new_post.post_id.to_string())
+                    .add_attribute("editor", new_post.editor.unwrap()))
+            }
+            else {
+                return Err(ContractError::UnauthorizedEdit {});
+            }
+        }
+    }
 }
 fn execute_delete_post(
     deps: DepsMut,
@@ -171,24 +211,56 @@ fn execute_delete_post(
     let post = POST.load(deps.storage, post_id)?;
     let deleter = info.sender.to_string();
     let validated_deleter = deps.api.addr_validate(&deleter)?;
-    let deleted_post: Post = Post {
-        post_id: post.post_id,
-        post_title: post.post_title,
-        external_id: "".to_string(),
-        text: "This post has been deleted.".to_string(),
-        tags: vec!["Deleted".to_string()],
-        author: post.author,
-        creation_date: post.creation_date,
-        last_edit_date: post.last_edit_date,
-        deleter: Some(validated_deleter.to_string()),
-        editor: post.editor,
-        deletion_date: Some(env.block.time.to_string()),
-    };
-    POST.save(deps.storage, post_id, &deleted_post)?;
-    Ok(Response::new()
-        .add_attribute("action", "delete_post")
-        .add_attribute("post_id", deleted_post.post_id.to_string())
-        .add_attribute("delete", deleted_post.deleter.unwrap()))
+    let editable_post = post.editable;
+    match editable_post {
+        true => {
+            let deleted_post: Post = Post {
+                editable: post.editable,
+                post_id: post.post_id,
+                post_title: post.post_title,
+                external_id: "".to_string(),
+                text: "This post has been deleted.".to_string(),
+                tags: vec!["Deleted".to_string()],
+                author: post.author,
+                creation_date: post.creation_date,
+                last_edit_date: post.last_edit_date,
+                deleter: Some(validated_deleter.to_string()),
+                editor: post.editor,
+                deletion_date: Some(env.block.time.to_string()),
+            };
+            POST.save(deps.storage, post_id, &deleted_post)?;
+            Ok(Response::new()
+                .add_attribute("action", "delete_post")
+                .add_attribute("post_id", deleted_post.post_id.to_string())
+                .add_attribute("delete", deleted_post.deleter.unwrap()))
+        }
+        false => {
+            if info.sender == post.author {
+                let deleted_post: Post = Post {
+                    editable: post.editable,
+                    post_id: post.post_id,
+                    post_title: post.post_title,
+                    external_id: "".to_string(),
+                    text: "This post has been deleted.".to_string(),
+                    tags: vec!["Deleted".to_string()],
+                    author: post.author,
+                    creation_date: post.creation_date,
+                    last_edit_date: post.last_edit_date,
+                    deleter: Some(validated_deleter.to_string()),
+                    editor: post.editor,
+                    deletion_date: Some(env.block.time.to_string()),
+                };
+                POST.save(deps.storage, post_id, &deleted_post)?;
+                Ok(Response::new()
+                    .add_attribute("action", "delete_post")
+                    .add_attribute("post_id", deleted_post.post_id.to_string())
+                    .add_attribute("delete", deleted_post.deleter.unwrap()))
+            }
+            else {
+                return Err(ContractError::UnauthorizedEdit {});
+            }
+        }
+    }
 }
 
 fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {

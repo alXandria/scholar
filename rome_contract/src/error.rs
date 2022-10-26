@@ -20,4 +20,7 @@ pub enum ContractError {
 
     #[error("The IPFS link must be with alxandria's dedicated gateway: https://alxandria.infura-ipfs.io/ipfs/")]
     MustUseAlxandriaGateway {},
+
+    #[error("Cannot edit/delete a non-editable post unless you are the original post author.")]
+    UnauthorizedEdit {},
 }

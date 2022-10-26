@@ -68,6 +68,7 @@ fn test_execute_create_post_valid() {
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //new execute message
     let msg = ExecuteMsg::CreatePost {
+        editable: false,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -92,6 +93,7 @@ fn test_execute_create_post_invalid() {
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //new execute message
     let msg = ExecuteMsg::CreatePost {
+            editable: true,
             post_title: "Mintscan Prop 320".to_string(),
             //wrong URL
             external_id: "https://alxandri.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
@@ -117,6 +119,7 @@ fn test_execute_edit_post_valid() {
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -152,6 +155,7 @@ fn test_execute_edit_post_invalid() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -185,6 +189,7 @@ fn test_execute_delete_post_valid() {
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -213,6 +218,7 @@ fn test_execute_delete_post_invalid() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -229,6 +235,36 @@ fn test_execute_delete_post_invalid() {
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
 #[test]
+fn test_execute_delete_post_uneditable() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    //create a post
+    let msg = ExecuteMsg::CreatePost {
+        editable: false,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //delete message
+    let info = mock_info(ADDR2, &[coin(10_000_000, "ujunox")]);
+    let msg = ExecuteMsg::DeletePost { post_id: 1 };
+    let _res = execute(deps.as_mut(), env, info, msg).unwrap_err();
+}
+#[test]
 fn test_withdraw_valid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
@@ -239,6 +275,7 @@ fn test_withdraw_valid() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -265,6 +302,7 @@ fn test_withdraw_invalid() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -292,6 +330,7 @@ fn test_query_all_posts() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -305,6 +344,7 @@ fn test_query_all_posts() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Google.com".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
@@ -334,6 +374,7 @@ fn test_query_post() {
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
+        editable: true,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"

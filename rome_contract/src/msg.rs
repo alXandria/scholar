@@ -12,6 +12,7 @@ pub struct InstantiateMsg {
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     CreatePost {
+        editable: bool,
         post_title: String,
         external_id: String,
         text: String,
