@@ -65,7 +65,7 @@ fn test_execute_create_post_valid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
     //new execute message
     let msg = ExecuteMsg::CreatePost {
         editable: false,
@@ -243,7 +243,7 @@ fn test_execute_delete_post_uneditable() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
         editable: false,

@@ -82,7 +82,6 @@ fn execute_create_post(
     text: String,
     tags: Vec<String>,
 ) -> Result<Response, ContractError> {
-    assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
     if text.len() > MAX_TEXT_LENGTH {
         return Err(ContractError::TooMuchText {});
     }
@@ -110,12 +109,26 @@ fn execute_create_post(
         editor: None,
         deletion_date: None,
     };
-    LAST_POST_ID.save(deps.storage, &incremented_id)?;
-    POST.save(deps.storage, post.post_id, &post)?;
-    Ok(Response::new()
-        .add_attribute("action", "create_post")
-        .add_attribute("post_id", post.post_id.to_string())
-        .add_attribute("author", validated_author.to_string()))
+    match post.editable {
+        true => {
+            assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
+            LAST_POST_ID.save(deps.storage, &incremented_id)?;
+            POST.save(deps.storage, post.post_id, &post)?;
+            Ok(Response::new()
+                .add_attribute("action", "create_post")
+                .add_attribute("post_id", post.post_id.to_string())
+                .add_attribute("author", validated_author.to_string()))
+        }
+        false => {
+            assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
+            LAST_POST_ID.save(deps.storage, &incremented_id)?;
+            POST.save(deps.storage, post.post_id, &post)?;
+            Ok(Response::new()
+                .add_attribute("action", "create_post")
+                .add_attribute("post_id", post.post_id.to_string())
+                .add_attribute("author", validated_author.to_string()))
+        }
+    }
 }
 
 fn execute_edit_post(
