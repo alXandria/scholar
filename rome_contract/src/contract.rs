@@ -12,7 +12,7 @@ use crate::error::ContractError;
 use crate::msg::{
     AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
 };
-use crate::state::{Config, Post, CONFIG, LAST_POST_ID, POST};
+use crate::state::{Config, Post, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_NAME, ADDR_LOOKUP, ProfileName, Profile};
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -53,6 +53,14 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        ExecuteMsg::RegisterProfileName { profile_name } => {
+            execute_register_profile_name(deps, env, info, profile_name)
+        }
+        ExecuteMsg::CreateProfile {
+            bio,
+            profile_picture,
+            cover_picture,
+        } => execute_create_profile(deps, env, info, bio, profile_picture, cover_picture),
         ExecuteMsg::CreatePost {
             editable,
             post_title,
@@ -68,6 +76,65 @@ pub fn execute(
         } => execute_edit_post(deps, env, info, post_id, external_id, text, tags),
         ExecuteMsg::DeletePost { post_id } => execute_delete_post(deps, env, info, post_id),
         ExecuteMsg::Withdraw {} => execute_withdraw(deps, env, info),
+    }
+}
+fn execute_register_profile_name(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    profile_name: String,
+) -> Result<Response, ContractError> {
+    let check = PROFILE.may_load(deps.storage, profile_name.clone())?;
+    match check {
+        Some(_check) => Err(ContractError::ProfileNameTaken {
+            taken_profile_name: profile_name,
+        }),
+        None => {
+            let new_profile_name: ProfileName = ProfileName {
+                profile_name,
+                account_address: info.sender,
+            };
+            PROFILE_NAME.save(
+                deps.storage,
+                new_profile_name.profile_name.clone(),
+                &new_profile_name,
+            )?;
+            ADDR_LOOKUP.save(
+                deps.storage,
+                new_profile_name.account_address.clone(),
+                &new_profile_name,
+            )?;
+            Ok(Response::new())
+        }
+    }
+}
+fn execute_create_profile(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    bio: String,
+    profile_picture: String,
+    cover_picture: String,
+) -> Result<Response, ContractError> {
+    //query profile name and fail if it returns a post
+    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+    match profile_name_check {
+        Some(profile_name_check) => {
+            let new_profile: Profile = Profile {
+                profile_name: profile_name_check.profile_name,
+                bio,
+                profile_picture,
+                cover_picture,
+                account_address: info.sender,
+            };
+            PROFILE.save(
+                deps.storage,
+                new_profile.profile_name.to_string(),
+                &new_profile,
+            )?;
+            Ok(Response::new())
+        }
+        None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
 //clippy defaults to max value of 7

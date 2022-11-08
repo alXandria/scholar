@@ -11,6 +11,14 @@ pub struct InstantiateMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
+    RegisterProfileName {
+        profile_name: String,
+    },
+    CreateProfile {
+        bio: String,
+        profile_picture: String,
+        cover_picture: String,
+    },
     CreatePost {
         editable: bool,
         post_title: String,

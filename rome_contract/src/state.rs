@@ -9,6 +9,19 @@ pub struct Config {
     pub admin: Addr,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+pub struct ProfileName {
+    pub profile_name: String,
+    pub account_address: Addr,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+pub struct Profile {
+    pub profile_name: String,
+    pub bio: String,
+    pub profile_picture: String,
+    pub cover_picture: String,
+    pub account_address: Addr,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Post {
     pub editable: bool,
     //tracks specific posts through unique identifier
@@ -32,3 +45,7 @@ pub const CONFIG: Item<Config> = Item::new("config");
 //create a map of post. Addr is creator. u64 is post_id
 pub const POST: Map<u64, Post> = Map::new("post");
 pub const LAST_POST_ID: Item<u64> = Item::new("last_post_id");
+pub const PROFILE: Map<String, Profile> = Map::new("profile");
+pub const PROFILE_NAME: Map<String, ProfileName> = Map::new("profile_name");
+pub const ADDR_LOOKUP: Map<Addr, ProfileName> = Map::new("lookup_profile_name");
+
