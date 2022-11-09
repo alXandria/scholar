@@ -398,3 +398,63 @@ fn test_query_post() {
     let res: PostResponse = from_binary(&bin).unwrap();
     assert!(res.post.is_none());
 }
+#[test]
+fn test_register_profile_name() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env, info, msg).unwrap();
+}
+#[test]
+fn test_create_profile() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env, info, msg).unwrap();
+}
+#[test]
+fn test_register_profile_name_fails() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let info = mock_info(ADDR2, &[]);
+    let msg = ExecuteMsg::RegisterProfileName { profile_name: "Champ".to_string(), };
+    let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
+}

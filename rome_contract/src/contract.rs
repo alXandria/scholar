@@ -276,7 +276,7 @@ fn execute_edit_post(
                     .add_attribute("editor", new_post.editor.unwrap()))
             }
             else {
-                return Err(ContractError::UnauthorizedEdit {});
+                Err(ContractError::UnauthorizedEdit {})
             }
         }
     }
@@ -337,7 +337,7 @@ fn execute_delete_post(
                     .add_attribute("delete", deleted_post.deleter.unwrap()))
             }
             else {
-                return Err(ContractError::UnauthorizedEdit {});
+                Err(ContractError::UnauthorizedEdit {})
             }
         }
     }
