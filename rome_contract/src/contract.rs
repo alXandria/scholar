@@ -274,7 +274,7 @@ fn execute_edit_post(
                                     external_id,
                                     text,
                                     tags,
-                                    author: post.author,
+                                    author: post.author.clone(),
                                     creation_date: post.creation_date,
                                     last_edit_date: Some(env.block.time.to_string()),
                                     deleter: None,
@@ -282,9 +282,13 @@ fn execute_edit_post(
                                     deletion_date: None,
                                 };
                                 POST.save(deps.storage, post_id, &new_post)?;
+                                //original author profile is searched based on stored profile name 
+                                let original_author_lookup = PROFILE_NAME.load(deps.storage, post.author)?;
+                                //wallet address is retrieved from profile name map 
+                                let original_author_address = original_author_lookup.account_address;
+                                //fund share is sent to original author
                                 let share = BankMsg::Send {
-//NEED TO FIX THIS, CAN'T SEND TO @PROFILE_NAME: QUERY ADDRESS BY NAME WITH VARIABLE THEN SEND TO IT                                    
-                                    to_address: new_post.author,
+                                    to_address: original_author_address.to_string(),
                                     amount: vec![coin(500_000, JUNO)],
                                 };
                                 Ok(Response::new()
