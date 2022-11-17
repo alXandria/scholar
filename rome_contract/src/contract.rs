@@ -231,68 +231,79 @@ fn execute_edit_post(
     if is_false(external_id.starts_with(IPFS)) {
         return Err(ContractError::MustUseAlxandriaGateway {});
     }
-    let post = POST.load(deps.storage, post_id)?;
-    let editor = info.sender.to_string();
-    let validated_editor = deps.api.addr_validate(&editor)?;
-    let editable_post = post.editable;
-    match editable_post {
-        true => {
-            let new_post: Post = Post {
-                editable: post.editable,
-                post_id: post.post_id,
-                post_title: post.post_title,
-                external_id,
-                text,
-                tags,
-                author: post.author,
-                creation_date: post.creation_date,
-                last_edit_date: Some(env.block.time.to_string()),
-                deleter: None,
-                editor: Some(validated_editor.to_string()),
-                deletion_date: None,
-            };
-            POST.save(deps.storage, post_id, &new_post)?;
-            let share = BankMsg::Send {
-                to_address: new_post.author,
-                amount: vec![coin(500_000, JUNO)],
-            };
-            Ok(Response::new()
-                .add_message(share)
-                .add_attribute("action", "edit_post")
-                .add_attribute("post_id", new_post.post_id.to_string())
-                .add_attribute("editor", new_post.editor.unwrap()))
-        }
-        false => {
-            if info.sender == post.author {
-                let new_post: Post = Post {
-                    editable: post.editable,
-                    post_id: post.post_id,
-                    post_title: post.post_title,
-                    external_id,
-                    text,
-                    tags,
-                    author: post.author,
-                    creation_date: post.creation_date,
-                    last_edit_date: Some(env.block.time.to_string()),
-                    deleter: None,
-                    editor: Some(validated_editor.to_string()),
-                    deletion_date: None,
-                };
-                POST.save(deps.storage, post_id, &new_post)?;
-                let share = BankMsg::Send {
-                    to_address: new_post.author,
-                    amount: vec![coin(500_000, JUNO)],
-                };
-                Ok(Response::new()
-                    .add_message(share)
-                    .add_attribute("action", "edit_post")
-                    .add_attribute("post_id", new_post.post_id.to_string())
-                    .add_attribute("editor", new_post.editor.unwrap()))
+    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+    match profile_name_check {
+        Some(profile_name_check) => {
+            let registered_profile_check =
+                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
+            match registered_profile_check {
+                Some(registered_profile_check) => {
+                    let post = POST.load(deps.storage, post_id)?;
+                    let editable_post = post.editable;
+                    match editable_post {
+                        true => {
+                            let new_post: Post = Post {
+                                editable: post.editable,
+                                post_id: post.post_id,
+                                post_title: post.post_title,
+                                external_id,
+                                text,
+                                tags,
+                                author: post.author,
+                                creation_date: post.creation_date,
+                                last_edit_date: Some(env.block.time.to_string()),
+                                deleter: None,
+                                editor: Some(registered_profile_check.profile_name),
+                                deletion_date: None,
+                            };
+                            POST.save(deps.storage, post_id, &new_post)?;
+                            let share = BankMsg::Send {
+                                to_address: new_post.author,
+                                amount: vec![coin(500_000, JUNO)],
+                            };
+                            Ok(Response::new()
+                                .add_message(share)
+                                .add_attribute("action", "edit_post")
+                                .add_attribute("post_id", new_post.post_id.to_string())
+                                .add_attribute("editor", new_post.editor.unwrap()))
+                        }
+                        false => {
+                            if info.sender == post.author {
+                                let new_post: Post = Post {
+                                    editable: post.editable,
+                                    post_id: post.post_id,
+                                    post_title: post.post_title,
+                                    external_id,
+                                    text,
+                                    tags,
+                                    author: post.author,
+                                    creation_date: post.creation_date,
+                                    last_edit_date: Some(env.block.time.to_string()),
+                                    deleter: None,
+                                    editor: Some(registered_profile_check.profile_name),
+                                    deletion_date: None,
+                                };
+                                POST.save(deps.storage, post_id, &new_post)?;
+                                let share = BankMsg::Send {
+                                    to_address: new_post.author,
+                                    amount: vec![coin(500_000, JUNO)],
+                                };
+                                Ok(Response::new()
+                                    .add_message(share)
+                                    .add_attribute("action", "edit_post")
+                                    .add_attribute("post_id", new_post.post_id.to_string())
+                                    .add_attribute("editor", new_post.editor.unwrap()))
+                            }
+                            else {
+                                Err(ContractError::UnauthorizedEdit {})
+                            }
+                        }
+                    }
+                }
+                None => Err(ContractError::NeedToRegisterProfile {}),
             }
-            else {
-                Err(ContractError::UnauthorizedEdit {})
-            }
         }
+        None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
 fn execute_delete_post(
