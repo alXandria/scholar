@@ -160,43 +160,57 @@ fn execute_create_post(
     }
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
-    let author = info.sender.to_string();
-    let validated_author = deps.api.addr_validate(&author)?;
-    let post: Post = Post {
-        editable,
-        post_id: incremented_id,
-        post_title,
-        external_id,
-        text,
-        tags,
-        author: validated_author.to_string(),
-        creation_date: env.block.time.to_string(),
-        last_edit_date: None,
-        deleter: None,
-        editor: None,
-        deletion_date: None,
-    };
-    match post.editable {
-        true => {
-            assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
-            LAST_POST_ID.save(deps.storage, &incremented_id)?;
-            POST.save(deps.storage, post.post_id, &post)?;
-            Ok(Response::new()
-                .add_attribute("action", "create_post")
-                .add_attribute("post_id", post.post_id.to_string())
-                .add_attribute("author", validated_author.to_string()))
+    //begin input
+    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
+    match profile_name_check {
+        Some(profile_name_check) => {
+            let registered_profile_check =
+                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
+            match registered_profile_check {
+                Some(registered_profile_check) => {
+                    let post: Post = Post {
+                        editable,
+                        post_id: incremented_id,
+                        post_title,
+                        external_id,
+                        text,
+                        tags,
+                        author: registered_profile_check.profile_name.clone(),
+                        creation_date: env.block.time.to_string(),
+                        last_edit_date: None,
+                        deleter: None,
+                        editor: None,
+                        deletion_date: None,
+                    };
+                    match post.editable {
+                        true => {
+                            assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
+                            LAST_POST_ID.save(deps.storage, &incremented_id)?;
+                            POST.save(deps.storage, post.post_id, &post)?;
+                            Ok(Response::new()
+                                .add_attribute("action", "create_post")
+                                .add_attribute("post_id", post.post_id.to_string())
+                                .add_attribute("author", registered_profile_check.profile_name.clone()))
+                        }
+                        false => {
+                            //increased fee
+                            assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
+                            LAST_POST_ID.save(deps.storage, &incremented_id)?;
+                            POST.save(deps.storage, post.post_id, &post)?;
+                            Ok(Response::new()
+                                .add_attribute("action", "create_post")
+                                .add_attribute("post_id", post.post_id.to_string())
+                                .add_attribute("author", registered_profile_check.profile_name))
+                        }
+                    }
+                }
+                None => Err(ContractError::NeedToRegisterProfile {}),
+            }
         }
-        false => {
-            assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
-            LAST_POST_ID.save(deps.storage, &incremented_id)?;
-            POST.save(deps.storage, post.post_id, &post)?;
-            Ok(Response::new()
-                .add_attribute("action", "create_post")
-                .add_attribute("post_id", post.post_id.to_string())
-                .add_attribute("author", validated_author.to_string()))
-        }
+        None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
+    //end input
 
 fn execute_edit_post(
     deps: DepsMut,
