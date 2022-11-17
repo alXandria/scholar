@@ -160,7 +160,6 @@ fn execute_create_post(
     }
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
-    //begin input
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
     match profile_name_check {
         Some(profile_name_check) => {
@@ -210,7 +209,6 @@ fn execute_create_post(
         None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
-    //end input
 
 fn execute_edit_post(
     deps: DepsMut,
@@ -285,6 +283,7 @@ fn execute_edit_post(
                                 };
                                 POST.save(deps.storage, post_id, &new_post)?;
                                 let share = BankMsg::Send {
+//NEED TO FIX THIS, CAN'T SEND TO @PROFILE_NAME: QUERY ADDRESS BY NAME WITH VARIABLE THEN SEND TO IT                                    
                                     to_address: new_post.author,
                                     amount: vec![coin(500_000, JUNO)],
                                 };
@@ -313,58 +312,69 @@ fn execute_delete_post(
     post_id: u64,
 ) -> Result<Response, ContractError> {
     assert_sent_exact_coin(&info.funds, Some(Coin::new(10_000_000, JUNO)))?;
-    let post = POST.load(deps.storage, post_id)?;
-    let deleter = info.sender.to_string();
-    let validated_deleter = deps.api.addr_validate(&deleter)?;
-    let editable_post = post.editable;
-    match editable_post {
-        true => {
-            let deleted_post: Post = Post {
-                editable: post.editable,
-                post_id: post.post_id,
-                post_title: post.post_title,
-                external_id: "".to_string(),
-                text: "This post has been deleted.".to_string(),
-                tags: vec!["Deleted".to_string()],
-                author: post.author,
-                creation_date: post.creation_date,
-                last_edit_date: post.last_edit_date,
-                deleter: Some(validated_deleter.to_string()),
-                editor: post.editor,
-                deletion_date: Some(env.block.time.to_string()),
-            };
-            POST.save(deps.storage, post_id, &deleted_post)?;
-            Ok(Response::new()
-                .add_attribute("action", "delete_post")
-                .add_attribute("post_id", deleted_post.post_id.to_string())
-                .add_attribute("delete", deleted_post.deleter.unwrap()))
-        }
-        false => {
-            if info.sender == post.author {
-                let deleted_post: Post = Post {
-                    editable: post.editable,
-                    post_id: post.post_id,
-                    post_title: post.post_title,
-                    external_id: "".to_string(),
-                    text: "This post has been deleted.".to_string(),
-                    tags: vec!["Deleted".to_string()],
-                    author: post.author,
-                    creation_date: post.creation_date,
-                    last_edit_date: post.last_edit_date,
-                    deleter: Some(validated_deleter.to_string()),
-                    editor: post.editor,
-                    deletion_date: Some(env.block.time.to_string()),
-                };
-                POST.save(deps.storage, post_id, &deleted_post)?;
-                Ok(Response::new()
-                    .add_attribute("action", "delete_post")
-                    .add_attribute("post_id", deleted_post.post_id.to_string())
-                    .add_attribute("delete", deleted_post.deleter.unwrap()))
+    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+    match profile_name_check {
+        Some(profile_name_check) => {
+            let registered_profile_check =
+                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
+            match registered_profile_check {
+                Some(registered_profile_check) => {
+                    let post = POST.load(deps.storage, post_id)?;
+                    let editable_post = post.editable;
+                    match editable_post {
+                        true => {
+                            let deleted_post: Post = Post {
+                                editable: post.editable,
+                                post_id: post.post_id,
+                                post_title: post.post_title,
+                                external_id: "".to_string(),
+                                text: "This post has been deleted.".to_string(),
+                                tags: vec!["Deleted".to_string()],
+                                author: post.author,
+                                creation_date: post.creation_date,
+                                last_edit_date: post.last_edit_date,
+                                deleter: Some(registered_profile_check.profile_name),
+                                editor: post.editor,
+                                deletion_date: Some(env.block.time.to_string()),
+                            };
+                            POST.save(deps.storage, post_id, &deleted_post)?;
+                            Ok(Response::new()
+                                .add_attribute("action", "delete_post")
+                                .add_attribute("post_id", deleted_post.post_id.to_string())
+                                .add_attribute("delete", deleted_post.deleter.unwrap()))
+                        }
+                        false => {
+                            if info.sender == post.author {
+                                let deleted_post: Post = Post {
+                                    editable: post.editable,
+                                    post_id: post.post_id,
+                                    post_title: post.post_title,
+                                    external_id: "".to_string(),
+                                    text: "This post has been deleted.".to_string(),
+                                    tags: vec!["Deleted".to_string()],
+                                    author: post.author,
+                                    creation_date: post.creation_date,
+                                    last_edit_date: post.last_edit_date,
+                                    deleter: Some(registered_profile_check.profile_name),
+                                    editor: post.editor,
+                                    deletion_date: Some(env.block.time.to_string()),
+                                };
+                                POST.save(deps.storage, post_id, &deleted_post)?;
+                                Ok(Response::new()
+                                    .add_attribute("action", "delete_post")
+                                    .add_attribute("post_id", deleted_post.post_id.to_string())
+                                    .add_attribute("delete", deleted_post.deleter.unwrap()))
+                            }
+                            else {
+                                Err(ContractError::UnauthorizedEdit {})
+                            }
+                        }
+                    }
+                }
+                None => Err(ContractError::NeedToRegisterProfile {}),
             }
-            else {
-                Err(ContractError::UnauthorizedEdit {})
-            }
         }
+        None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
 
