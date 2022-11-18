@@ -64,9 +64,22 @@ fn test_execute_create_post_valid() {
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //set proper fee in info for post creation
     let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
-    //new execute message
+    //create new post
     let msg = ExecuteMsg::CreatePost {
         editable: false,
         post_title: "Mintscan Prop 320".to_string(),
@@ -91,7 +104,19 @@ fn test_execute_create_post_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //new execute message
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //create new post with wrong URL to fail
     let msg = ExecuteMsg::CreatePost {
             editable: true,
             post_title: "Mintscan Prop 320".to_string(),
