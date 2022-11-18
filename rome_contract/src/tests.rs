@@ -205,7 +205,7 @@ fn test_execute_edit_post_invalid() {
         cover_picture: "google.com".to_string(), 
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //set funds for edit INCORRECTLY to fail
+    //set funds for post creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create post
     let msg = ExecuteMsg::CreatePost {
@@ -222,7 +222,7 @@ fn test_execute_edit_post_invalid() {
         text: "".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //attempt to edit post with same info message, aka not enough funds
+    //edit post without updating funds, will fail for incorrect funds
     let msg = ExecuteMsg::EditPost {
             post_id: 1,
             external_id: "https://stake.tax/".to_string(),
@@ -236,10 +236,24 @@ fn test_execute_delete_post_valid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
+    //intantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //set info with funds for article creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
@@ -256,8 +270,9 @@ fn test_execute_delete_post_valid() {
         text: "".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    //delete message
+    //set info for funds for post deletion
     let info = mock_info(ADDR1, &[coin(10_000_000, "ujunox")]);
+    //delete post
     let msg = ExecuteMsg::DeletePost { post_id: 1 };
     let _res = execute(deps.as_mut(), env, info, msg).unwrap();
 }
@@ -266,11 +281,26 @@ fn test_execute_delete_post_invalid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    //intantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //set funds for post creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    //create post
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
@@ -285,6 +315,7 @@ fn test_execute_delete_post_invalid() {
         text: "".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //delete post without updating funds, will fail for incorrect funds
     let msg = ExecuteMsg::DeletePost { post_id: 3 };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
