@@ -324,12 +324,26 @@ fn test_execute_delete_post_uneditable() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
+    //intantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //set info for proper funds to create a post that is uneditable
     let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
-    //create a post
+    //create a post that is uneditable
     let msg = ExecuteMsg::CreatePost {
         editable: false,
         post_title: "Mintscan Prop 320".to_string(),
@@ -344,7 +358,7 @@ fn test_execute_delete_post_uneditable() {
         text: "".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    //delete message
+    //attempt to delete message by non-original-author (fail)
     let info = mock_info(ADDR2, &[coin(10_000_000, "ujunox")]);
     let msg = ExecuteMsg::DeletePost { post_id: 1 };
     let _res = execute(deps.as_mut(), env, info, msg).unwrap_err();
@@ -354,10 +368,23 @@ fn test_withdraw_valid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
+    //intantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile { 
+        bio: "This is my bio".to_string(), 
+        profile_picture: "google.com".to_string(), 
+        cover_picture: "google.com".to_string(), 
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
