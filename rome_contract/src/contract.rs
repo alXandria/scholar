@@ -84,11 +84,13 @@ fn execute_register_profile_name(
     info: MessageInfo,
     profile_name: String,
 ) -> Result<Response, ContractError> {
+    //1) Check to see if there is the desired profile name is registered
     let check = PROFILE.may_load(deps.storage, profile_name.clone())?;
     match check {
         Some(_check) => Err(ContractError::ProfileNameTaken {
             taken_profile_name: profile_name,
         }),
+        //2) If profile name isn't registered, save it to account
         None => {
             let new_profile_name: ProfileName = ProfileName {
                 profile_name,
@@ -104,7 +106,9 @@ fn execute_register_profile_name(
                 new_profile_name.account_address.clone(),
                 &new_profile_name,
             )?;
-            Ok(Response::new())
+            Ok(Response::new()
+                .add_attribute("action", "create profile name")
+                .add_attribute("new profile name", new_profile_name.profile_name))
         }
     }
 }
@@ -116,9 +120,10 @@ fn execute_create_profile(
     profile_picture: String,
     cover_picture: String,
 ) -> Result<Response, ContractError> {
-    //query profile name and fail if it returns a post
+    //query profile name and ensure it is registered to the transactor
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
     match profile_name_check {
+        //if there is a profile name, save the profile and store same profile name to profile
         Some(profile_name_check) => {
             let new_profile: Profile = Profile {
                 profile_name: profile_name_check.profile_name,
@@ -132,7 +137,8 @@ fn execute_create_profile(
                 new_profile.profile_name.to_string(),
                 &new_profile,
             )?;
-            Ok(Response::new())
+            Ok(Response::new()
+                .add_attribute("action", "create profile"))
         }
         None => Err(ContractError::NeedToRegisterProfileName {}),
     }
@@ -160,12 +166,15 @@ fn execute_create_post(
     }
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
+    //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
     match profile_name_check {
+        //if there is a profile name, search for a profile 
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
             match registered_profile_check {
+                //if there is a profile allow the user to create a post
                 Some(registered_profile_check) => {
                     let post: Post = Post {
                         editable,
@@ -181,6 +190,8 @@ fn execute_create_post(
                         editor: None,
                         deletion_date: None,
                     };
+                    //check to see whether the user elected to make the post editable or not,
+                    //this effects the price
                     match post.editable {
                         true => {
                             assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
@@ -189,7 +200,7 @@ fn execute_create_post(
                             Ok(Response::new()
                                 .add_attribute("action", "create_post")
                                 .add_attribute("post_id", post.post_id.to_string())
-                                .add_attribute("author", registered_profile_check.profile_name.clone()))
+                                .add_attribute("author", registered_profile_check.profile_name))
                         }
                         false => {
                             //increased fee
@@ -229,15 +240,19 @@ fn execute_edit_post(
     if is_false(external_id.starts_with(IPFS)) {
         return Err(ContractError::MustUseAlxandriaGateway {});
     }
+    //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
     match profile_name_check {
+        //if there is a profile name, search for a profile 
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
             match registered_profile_check {
+                //if there is a profile, load the original post
                 Some(registered_profile_check) => {
                     let post = POST.load(deps.storage, post_id)?;
                     let editable_post = post.editable;
+                    //If post is editable, allow user to edit
                     match editable_post {
                         true => {
                             let new_post: Post = Post {
@@ -270,6 +285,7 @@ fn execute_edit_post(
                                 .add_attribute("post_id", new_post.post_id.to_string())
                                 .add_attribute("editor", new_post.editor.unwrap()))
                         }
+                        //if post is not editable, see if sender is original author
                         false => {
                             if info.sender == post.author {
                                 let new_post: Post = Post {
@@ -321,16 +337,20 @@ fn execute_delete_post(
     post_id: u64,
 ) -> Result<Response, ContractError> {
     assert_sent_exact_coin(&info.funds, Some(Coin::new(10_000_000, JUNO)))?;
+    //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
     match profile_name_check {
+        //if there is a profile name, search for a profile 
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
+            //if there is a profile, load the post
             match registered_profile_check {
                 Some(registered_profile_check) => {
                     let post = POST.load(deps.storage, post_id)?;
                     let editable_post = post.editable;
                     match editable_post {
+                        //If post is editable, allow user to edit
                         true => {
                             let deleted_post: Post = Post {
                                 editable: post.editable,
@@ -352,6 +372,7 @@ fn execute_delete_post(
                                 .add_attribute("post_id", deleted_post.post_id.to_string())
                                 .add_attribute("delete", deleted_post.deleter.unwrap()))
                         }
+                        //if post is not editable, see if sender is original author
                         false => {
                             if info.sender == post.author {
                                 let deleted_post: Post = Post {
@@ -388,6 +409,7 @@ fn execute_delete_post(
 }
 
 fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
+    //see if transactor is administrative wallet, fail if not
     if info.sender != ADMIN {
         return Err(ContractError::Unauthorized {});
     }
