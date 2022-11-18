@@ -71,10 +71,10 @@ fn test_execute_create_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set proper fee in info for post creation
@@ -110,10 +110,10 @@ fn test_execute_create_post_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //create new post with wrong URL to fail
@@ -148,10 +148,10 @@ fn test_execute_edit_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //set funds in info to pay for interaction
@@ -199,10 +199,10 @@ fn test_execute_edit_post_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //set funds for post creation
@@ -224,11 +224,11 @@ fn test_execute_edit_post_invalid() {
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //edit post without updating funds, will fail for incorrect funds
     let msg = ExecuteMsg::EditPost {
-            post_id: 1,
-            external_id: "https://stake.tax/".to_string(),
-            text: "edited post".to_string(),
-            tags: vec!["Tax".to_string(), "Website".to_string()],
-        };
+        post_id: 1,
+        external_id: "https://stake.tax/".to_string(),
+        text: "edited post".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
 #[test]
@@ -247,10 +247,10 @@ fn test_execute_delete_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //set info with funds for article creation
@@ -292,10 +292,10 @@ fn test_execute_delete_post_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //set funds for post creation
@@ -335,10 +335,10 @@ fn test_execute_delete_post_uneditable() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //set info for proper funds to create a post that is uneditable
@@ -379,10 +379,10 @@ fn test_withdraw_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
@@ -419,10 +419,10 @@ fn test_withdraw_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
@@ -460,10 +460,10 @@ fn test_query_all_posts() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
@@ -517,10 +517,10 @@ fn test_query_post() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
@@ -554,11 +554,12 @@ fn test_register_profile_name() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
-
+    //instantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
     let msg = ExecuteMsg::RegisterProfileName {
         profile_name: "Champ".to_string(),
     };
@@ -569,19 +570,21 @@ fn test_create_profile() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
-
+    //instantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
     let msg = ExecuteMsg::RegisterProfileName {
         profile_name: "Champ".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    //register profile
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env, info, msg).unwrap();
 }
@@ -590,22 +593,29 @@ fn test_register_profile_name_fails() {
     let mut deps = mock_dependencies();
     let env = mock_env();
     let info = mock_info(ADDR1, &[]);
-
+    //instantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
     let msg = ExecuteMsg::RegisterProfileName {
         profile_name: "Champ".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    let msg = ExecuteMsg::CreateProfile { 
-        bio: "This is my bio".to_string(), 
-        profile_picture: "google.com".to_string(), 
-        cover_picture: "google.com".to_string(), 
+    //register profile
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //set info to different addresss than who has the registered profile name Champ
     let info = mock_info(ADDR2, &[]);
-    let msg = ExecuteMsg::RegisterProfileName { profile_name: "Champ".to_string(), };
+    //attempt to register same profile name
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    //expect it to fail due to collision
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }

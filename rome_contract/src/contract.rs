@@ -12,7 +12,10 @@ use crate::error::ContractError;
 use crate::msg::{
     AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
 };
-use crate::state::{Config, Post, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_NAME, ADDR_LOOKUP, ProfileName, Profile};
+use crate::state::{
+    Config, Post, Profile, ProfileName, ADDR_LOOKUP, CONFIG, LAST_POST_ID, POST, PROFILE,
+    PROFILE_NAME,
+};
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -67,7 +70,16 @@ pub fn execute(
             external_id,
             text,
             tags,
-        } => execute_create_post(deps, env, info, editable, post_title, external_id, text, tags),
+        } => execute_create_post(
+            deps,
+            env,
+            info,
+            editable,
+            post_title,
+            external_id,
+            text,
+            tags,
+        ),
         ExecuteMsg::EditPost {
             post_id,
             external_id,
@@ -137,8 +149,7 @@ fn execute_create_profile(
                 new_profile.profile_name.to_string(),
                 &new_profile,
             )?;
-            Ok(Response::new()
-                .add_attribute("action", "create profile"))
+            Ok(Response::new().add_attribute("action", "create profile"))
         }
         None => Err(ContractError::NeedToRegisterProfileName {}),
     }
@@ -169,7 +180,7 @@ fn execute_create_post(
     //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
     match profile_name_check {
-        //if there is a profile name, search for a profile 
+        //if there is a profile name, search for a profile
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
@@ -243,7 +254,7 @@ fn execute_edit_post(
     //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
     match profile_name_check {
-        //if there is a profile name, search for a profile 
+        //if there is a profile name, search for a profile
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
@@ -270,9 +281,10 @@ fn execute_edit_post(
                                 deletion_date: None,
                             };
                             POST.save(deps.storage, post_id, &new_post)?;
-                            //original author profile is searched based on stored profile name 
-                            let original_author_lookup = PROFILE_NAME.load(deps.storage, post.author)?;
-                            //wallet address is retrieved from profile name map 
+                            //original author profile is searched based on stored profile name
+                            let original_author_lookup =
+                                PROFILE_NAME.load(deps.storage, post.author)?;
+                            //wallet address is retrieved from profile name map
                             let original_author_address = original_author_lookup.account_address;
                             //fund share is sent to original author
                             let share = BankMsg::Send {
@@ -303,10 +315,12 @@ fn execute_edit_post(
                                     deletion_date: None,
                                 };
                                 POST.save(deps.storage, post_id, &new_post)?;
-                                //original author profile is searched based on stored profile name 
-                                let original_author_lookup = PROFILE_NAME.load(deps.storage, post.author)?;
-                                //wallet address is retrieved from profile name map 
-                                let original_author_address = original_author_lookup.account_address;
+                                //original author profile is searched based on stored profile name
+                                let original_author_lookup =
+                                    PROFILE_NAME.load(deps.storage, post.author)?;
+                                //wallet address is retrieved from profile name map
+                                let original_author_address =
+                                    original_author_lookup.account_address;
                                 //fund share is sent to original author
                                 let share = BankMsg::Send {
                                     to_address: original_author_address.to_string(),
@@ -317,8 +331,7 @@ fn execute_edit_post(
                                     .add_attribute("action", "edit_post")
                                     .add_attribute("post_id", new_post.post_id.to_string())
                                     .add_attribute("editor", new_post.editor.unwrap()))
-                            }
-                            else {
+                            } else {
                                 Err(ContractError::UnauthorizedEdit {})
                             }
                         }
@@ -340,7 +353,7 @@ fn execute_delete_post(
     //check to see if there is a profile name associated with the wallet
     let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
     match profile_name_check {
-        //if there is a profile name, search for a profile 
+        //if there is a profile name, search for a profile
         Some(profile_name_check) => {
             let registered_profile_check =
                 PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
@@ -394,8 +407,7 @@ fn execute_delete_post(
                                     .add_attribute("action", "delete_post")
                                     .add_attribute("post_id", deleted_post.post_id.to_string())
                                     .add_attribute("delete", deleted_post.deleter.unwrap()))
-                            }
-                            else {
+                            } else {
                                 Err(ContractError::UnauthorizedEdit {})
                             }
                         }

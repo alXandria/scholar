@@ -23,7 +23,7 @@ pub enum ContractError {
 
     #[error("Cannot edit/delete a non-editable post unless you are the original post author.")]
     UnauthorizedEdit {},
-    
+
     #[error(
         "There is no profile name registered with this account. Please register a profile name."
     )]

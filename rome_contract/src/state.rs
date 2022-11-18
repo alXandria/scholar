@@ -48,4 +48,3 @@ pub const LAST_POST_ID: Item<u64> = Item::new("last_post_id");
 pub const PROFILE: Map<String, Profile> = Map::new("profile");
 pub const PROFILE_NAME: Map<String, ProfileName> = Map::new("profile_name");
 pub const ADDR_LOOKUP: Map<Addr, ProfileName> = Map::new("lookup_profile_name");
-
