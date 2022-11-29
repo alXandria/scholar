@@ -522,7 +522,7 @@ fn test_query_post() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,

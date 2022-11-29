@@ -1,3 +1,7 @@
+// TO DO
+// 1) Actually delete deleted posts
+// 2) format prpfile names
+
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Order,
     Response, StdError, StdResult,
@@ -96,16 +100,17 @@ fn execute_register_profile_name(
     info: MessageInfo,
     profile_name: String,
 ) -> Result<Response, ContractError> {
+    let formatted_profile_name = profile_name.trim().to_lowercase();
     //1) Check to see if there is the desired profile name is registered
-    let check = PROFILE.may_load(deps.storage, profile_name.clone())?;
+    let check = PROFILE.may_load(deps.storage, formatted_profile_name.clone())?;
     match check {
         Some(_check) => Err(ContractError::ProfileNameTaken {
-            taken_profile_name: profile_name,
+            taken_profile_name: formatted_profile_name,
         }),
         //2) If profile name isn't registered, save it to account
         None => {
             let new_profile_name: ProfileName = ProfileName {
-                profile_name,
+                profile_name: formatted_profile_name,
                 account_address: info.sender,
             };
             PROFILE_NAME.save(
