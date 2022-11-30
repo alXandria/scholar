@@ -203,9 +203,7 @@ fn execute_create_post(
                         author: registered_profile_check.profile_name.clone(),
                         creation_date: env.block.time.to_string(),
                         last_edit_date: None,
-                        deleter: None,
                         editor: None,
-                        deletion_date: None,
                     };
                     //check to see whether the user elected to make the post editable or not,
                     //this effects the price
@@ -282,9 +280,7 @@ fn execute_edit_post(
                                 author: post.author.clone(),
                                 creation_date: post.creation_date,
                                 last_edit_date: Some(env.block.time.to_string()),
-                                deleter: None,
                                 editor: Some(registered_profile_check.profile_name),
-                                deletion_date: None,
                             };
                             POST.save(deps.storage, post_id, &new_post)?;
                             //original author profile is searched based on stored profile name
@@ -316,9 +312,7 @@ fn execute_edit_post(
                                     author: post.author.clone(),
                                     creation_date: post.creation_date,
                                     last_edit_date: Some(env.block.time.to_string()),
-                                    deleter: None,
                                     editor: Some(registered_profile_check.profile_name),
-                                    deletion_date: None,
                                 };
                                 POST.save(deps.storage, post_id, &new_post)?;
                                 //original author profile is searched based on stored profile name
@@ -351,81 +345,35 @@ fn execute_edit_post(
 }
 fn execute_delete_post(
     deps: DepsMut,
-    env: Env,
+    _env: Env,
     info: MessageInfo,
     post_id: u64,
 ) -> Result<Response, ContractError> {
     assert_sent_exact_coin(&info.funds, Some(Coin::new(10_000_000, JUNO)))?;
-    //check to see if there is a profile name associated with the wallet
-    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
-    match profile_name_check {
-        //if there is a profile name, search for a profile
-        Some(profile_name_check) => {
-            let registered_profile_check =
-                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
-            //if there is a profile, load the post
-            match registered_profile_check {
-                Some(registered_profile_check) => {
-                    let post = POST.load(deps.storage, post_id)?;
-                    let editable_post = post.editable;
-                    match editable_post {
-                        //If post is editable, allow user to edit
-                        true => {
-                            let deleted_post: Post = Post {
-                                editable: post.editable,
-                                post_id: post.post_id,
-                                post_title: post.post_title,
-                                external_id: "".to_string(),
-                                text: "This post has been deleted.".to_string(),
-                                tags: vec!["Deleted".to_string()],
-                                author: post.author,
-                                creation_date: post.creation_date,
-                                last_edit_date: post.last_edit_date,
-                                deleter: Some(registered_profile_check.profile_name),
-                                editor: post.editor,
-                                deletion_date: Some(env.block.time.to_string()),
-                            };
-                            POST.save(deps.storage, post_id, &deleted_post)?;
-                            Ok(Response::new()
-                                .add_attribute("action", "delete_post")
-                                .add_attribute("post_id", deleted_post.post_id.to_string())
-                                .add_attribute("delete", deleted_post.deleter.unwrap()))
-                        }
-                        //if post is not editable, see if sender is original author
-                        false => {
-                            if info.sender == post.author {
-                                let deleted_post: Post = Post {
-                                    editable: post.editable,
-                                    post_id: post.post_id,
-                                    post_title: post.post_title,
-                                    external_id: "".to_string(),
-                                    text: "This post has been deleted.".to_string(),
-                                    tags: vec!["Deleted".to_string()],
-                                    author: post.author,
-                                    creation_date: post.creation_date,
-                                    last_edit_date: post.last_edit_date,
-                                    deleter: Some(registered_profile_check.profile_name),
-                                    editor: post.editor,
-                                    deletion_date: Some(env.block.time.to_string()),
-                                };
-                                POST.save(deps.storage, post_id, &deleted_post)?;
-                                Ok(Response::new()
-                                    .add_attribute("action", "delete_post")
-                                    .add_attribute("post_id", deleted_post.post_id.to_string())
-                                    .add_attribute("delete", deleted_post.deleter.unwrap()))
-                            } else {
-                                Err(ContractError::UnauthorizedEdit {})
-                            }
-                        }
+    let post = POST.may_load(deps.storage, post_id)?;
+    match post {
+        Some(post) => {
+            //see if sender is original author
+            let author = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+            match author {
+                Some(author) => {
+                    if author.profile_name == post.author {
+                        POST.remove(deps.storage, post_id);
+                        Ok(Response::new()
+                        .add_attribute("delete post", post_id.to_string()))
+                    }
+                    else {
+                        println!("{}", post.author);
+                        println!("{}", info.sender);
+                        return Err(ContractError::UnauthorizedEdit {  });
                     }
                 }
-                None => Err(ContractError::NeedToRegisterProfile {}),
-            }
-        }
-        None => Err(ContractError::NeedToRegisterProfileName {}),
+                None => Err(ContractError::NeedToRegisterProfileName {  })
+                }
+            } 
+        None => Err(ContractError::PostDoesNotExist {  })
     }
 }
-
 fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
     //see if transactor is administrative wallet, fail if not
     if info.sender != ADMIN {

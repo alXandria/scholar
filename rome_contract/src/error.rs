@@ -34,4 +34,7 @@ pub enum ContractError {
 
     #[error("The profile name {taken_profile_name} is already taken. Please choose another")]
     ProfileNameTaken { taken_profile_name: String },
+
+    #[error("Post does not exist")]
+    PostDoesNotExist {},
 }

@@ -274,7 +274,12 @@ fn test_execute_delete_post_valid() {
     let info = mock_info(ADDR1, &[coin(10_000_000, "ujunox")]);
     //delete post
     let msg = ExecuteMsg::DeletePost { post_id: 1 };
-    let _res = execute(deps.as_mut(), env, info, msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //query deleted post
+    let msg = QueryMsg::Post { post_id: 1 };
+    let bin = query(deps.as_ref(), env, msg).unwrap();
+    let res: PostResponse = from_binary(&bin).unwrap();
+    assert!(res.post.is_none());
 }
 #[test]
 fn test_execute_delete_post_invalid() {
