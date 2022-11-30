@@ -5,18 +5,70 @@
     {
       "type": "object",
       "required": [
+        "register_profile_name"
+      ],
+      "properties": {
+        "register_profile_name": {
+          "type": "object",
+          "required": [
+            "profile_name"
+          ],
+          "properties": {
+            "profile_name": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "create_profile"
+      ],
+      "properties": {
+        "create_profile": {
+          "type": "object",
+          "required": [
+            "bio",
+            "cover_picture",
+            "profile_picture"
+          ],
+          "properties": {
+            "bio": {
+              "type": "string"
+            },
+            "cover_picture": {
+              "type": "string"
+            },
+            "profile_picture": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
         "create_post"
       ],
       "properties": {
         "create_post": {
           "type": "object",
           "required": [
+            "editable",
             "external_id",
             "post_title",
             "tags",
             "text"
           ],
           "properties": {
+            "editable": {
+              "type": "boolean"
+            },
             "external_id": {
               "type": "string"
             },

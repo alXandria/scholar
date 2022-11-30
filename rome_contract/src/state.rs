@@ -5,15 +5,18 @@ use cosmwasm_std::Addr;
 use cw_storage_plus::{Item, Map};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct Config {
     pub admin: Addr,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct ProfileName {
     pub profile_name: String,
     pub account_address: Addr,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct Profile {
     pub profile_name: String,
     pub bio: String,
@@ -22,6 +25,7 @@ pub struct Profile {
     pub account_address: Addr,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct Post {
     pub editable: bool,
     //tracks specific posts through unique identifier

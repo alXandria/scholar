@@ -1,6 +1,7 @@
 // TO DO
 // 1) Actually delete deleted posts
-// 2) format prpfile names
+// 2) format profile names
+// 3) functions to replace check profile name & profile
 
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Order,

@@ -5,6 +5,7 @@
   "required": [
     "author",
     "creation_date",
+    "editable",
     "external_id",
     "post_id",
     "post_title",
@@ -29,6 +30,9 @@
         "string",
         "null"
       ]
+    },
+    "editable": {
+      "type": "boolean"
     },
     "editor": {
       "type": [

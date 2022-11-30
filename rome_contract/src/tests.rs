@@ -153,7 +153,7 @@ fn test_execute_edit_post_valid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds in info to pay for interaction
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create a post
@@ -204,7 +204,7 @@ fn test_execute_edit_post_invalid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds for post creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create post
@@ -252,7 +252,7 @@ fn test_execute_delete_post_valid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set info with funds for article creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create a post
@@ -297,7 +297,7 @@ fn test_execute_delete_post_invalid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds for post creation
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     //create post
@@ -340,7 +340,7 @@ fn test_execute_delete_post_uneditable() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set info for proper funds to create a post that is uneditable
     let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
     //create a post that is uneditable
@@ -384,7 +384,7 @@ fn test_withdraw_valid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -424,7 +424,7 @@ fn test_withdraw_invalid() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -465,7 +465,7 @@ fn test_query_all_posts() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
