@@ -1,7 +1,5 @@
 // TO DO
-// 1) Actually delete deleted posts
-// 2) format profile names
-// 3) functions to replace check profile name & profile
+// 1) functions to replace check profile name & profile
 
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Order,
@@ -261,7 +259,7 @@ fn execute_edit_post(
         //if there is a profile name, search for a profile
         Some(profile_name_check) => {
             let registered_profile_check =
-                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
+                PROFILE.may_load(deps.storage, profile_name_check.profile_name.clone())?;
             match registered_profile_check {
                 //if there is a profile, load the original post
                 Some(registered_profile_check) => {
@@ -301,7 +299,7 @@ fn execute_edit_post(
                         }
                         //if post is not editable, see if sender is original author
                         false => {
-                            if info.sender == post.author {
+                            if profile_name_check.profile_name == post.author {
                                 let new_post: Post = Post {
                                     editable: post.editable,
                                     post_id: post.post_id,
