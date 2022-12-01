@@ -624,3 +624,55 @@ fn test_register_profile_name_fails() {
     //expect it to fail due to collision
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
+#[test]
+fn test_execute_unlock_article() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+    //instatiate
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile name
+    let info = mock_info(ADDR2, &[]);
+    let msg = ExecuteMsg::RegisterProfileName {
+        profile_name: "Champ".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile {
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //set proper fee in info for post creation
+    let info = mock_info(ADDR2, &[coin(5_000_000, "ujunox")]);
+    //create new post
+    let msg = ExecuteMsg::CreatePost {
+        editable: false,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "Hi".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //test unlocking
+    let info = mock_info(ADDR1, &[]);
+    let msg = ExecuteMsg::UnlockArticle { post_id: 1 };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg);
+    //query article for attributes
+    let msg = QueryMsg::Post { post_id: 1 };
+    let bin = query(deps.as_ref(), env, msg).unwrap();
+    let res: PostResponse = from_binary(&bin).unwrap();
+    println!("{:?}", res);
+    //switch to is_none to intentionally fail and check output to verify editable is true
+    assert!(res.post.is_some());
+}
