@@ -358,19 +358,17 @@ fn execute_delete_post(
                 Some(author) => {
                     if author.profile_name == post.author {
                         POST.remove(deps.storage, post_id);
-                        Ok(Response::new()
-                        .add_attribute("delete post", post_id.to_string()))
-                    }
-                    else {
+                        Ok(Response::new().add_attribute("delete post", post_id.to_string()))
+                    } else {
                         println!("{}", post.author);
                         println!("{}", info.sender);
-                        return Err(ContractError::UnauthorizedEdit {  });
+                        return Err(ContractError::UnauthorizedEdit {});
                     }
                 }
-                None => Err(ContractError::NeedToRegisterProfileName {  })
-                }
-            } 
-        None => Err(ContractError::PostDoesNotExist {  })
+                None => Err(ContractError::NeedToRegisterProfileName {}),
+            }
+        }
+        None => Err(ContractError::PostDoesNotExist {}),
     }
 }
 fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
@@ -396,7 +394,7 @@ fn execute_unlock_article(
     post_id: u64,
 ) -> Result<Response, ContractError> {
     if info.sender != ADMIN {
-        return Err(ContractError::Unauthorized {  });
+        return Err(ContractError::Unauthorized {});
     }
     let article = POST.load(deps.storage, post_id)?;
     let unlocked_article: Post = Post {
@@ -412,8 +410,7 @@ fn execute_unlock_article(
         editor: article.editor,
     };
     POST.save(deps.storage, post_id, &unlocked_article)?;
-    Ok(Response::new()
-        .add_attribute("Unlocked Article", unlocked_article.post_id.to_string()))   
+    Ok(Response::new().add_attribute("Unlocked Article", unlocked_article.post_id.to_string()))
 }
 
 #[entry_point]
