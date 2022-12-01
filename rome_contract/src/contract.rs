@@ -91,6 +91,7 @@ pub fn execute(
         } => execute_edit_post(deps, env, info, post_id, external_id, text, tags),
         ExecuteMsg::DeletePost { post_id } => execute_delete_post(deps, env, info, post_id),
         ExecuteMsg::Withdraw {} => execute_withdraw(deps, env, info),
+        ExecuteMsg::UnlockArticle { post_id } => execute_unlock_article(deps, env, info, post_id),
     }
 }
 fn execute_register_profile_name(
@@ -387,6 +388,32 @@ fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Respon
         .add_message(bank_msg)
         .add_attribute("action", "withdraw");
     Ok(resp)
+}
+fn execute_unlock_article(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    post_id: u64,
+) -> Result<Response, ContractError> {
+    if info.sender != ADMIN {
+        return Err(ContractError::Unauthorized {  });
+    }
+    let article = POST.load(deps.storage, post_id)?;
+    let unlocked_article: Post = Post {
+        editable: true,
+        post_id,
+        post_title: article.post_title,
+        external_id: article.external_id,
+        text: article.text,
+        tags: article.tags,
+        author: article.author,
+        creation_date: article.creation_date,
+        last_edit_date: article.last_edit_date,
+        editor: article.editor,
+    };
+    POST.save(deps.storage, post_id, &unlocked_article)?;
+    Ok(Response::new()
+        .add_attribute("Unlocked Article", unlocked_article.post_id.to_string()))   
 }
 
 #[entry_point]

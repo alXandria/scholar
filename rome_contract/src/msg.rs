@@ -36,6 +36,9 @@ pub enum ExecuteMsg {
         post_id: u64,
     },
     Withdraw {},
+    UnlockArticle {
+        post_id: u64,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
