@@ -1,5 +1,6 @@
 // TO DO
 // 1) functions to replace check profile name & profile
+// 2) Delete any whitespace in profile name?
 
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Order,
