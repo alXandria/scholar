@@ -159,6 +159,28 @@
         }
       },
       "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "unlock_article"
+      ],
+      "properties": {
+        "unlock_article": {
+          "type": "object",
+          "required": [
+            "post_id"
+          ],
+          "properties": {
+            "post_id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          }
+        }
+      },
+      "additionalProperties": false
     }
   ]
 }

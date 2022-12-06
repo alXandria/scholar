@@ -633,7 +633,7 @@ fn test_execute_unlock_article() {
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     //register profile name
     let info = mock_info(ADDR2, &[]);
     let msg = ExecuteMsg::RegisterProfileName {

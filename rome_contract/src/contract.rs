@@ -255,7 +255,7 @@ fn execute_edit_post(
         return Err(ContractError::MustUseAlxandriaGateway {});
     }
     //check to see if there is a profile name associated with the wallet
-    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
     match profile_name_check {
         //if there is a profile name, search for a profile
         Some(profile_name_check) => {
@@ -362,7 +362,7 @@ fn execute_delete_post(
                     } else {
                         println!("{}", post.author);
                         println!("{}", info.sender);
-                        return Err(ContractError::UnauthorizedEdit {});
+                        Err(ContractError::UnauthorizedEdit {})
                     }
                 }
                 None => Err(ContractError::NeedToRegisterProfileName {}),
