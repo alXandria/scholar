@@ -65,6 +65,21 @@ junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe
 
 https://testnet.juno.explorers.guru/transaction/555548A718BDE5F6CBBC6E183BC16DB7EBB70B7E3A1C3B912E814B5891177C51
 
+*Create Uneditable Post:*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"create_post":{"editable":false,"post_title":"Post 1","external_id":"https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT","text":"This post should pass!","tags":["pass","funds","attempt"]}}' --amount 5000000ujunox --from ADDRESS --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/27D05A1E40E7135754E734B37E471B9094AE15D55A1D5F4175A99D4D29460C20
+
+*Attempt to edit: Should Fail*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"edit_post":{"post_id":2,"external_id": "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT","text": "This edit should pass!","tags": ["pass", "double funds", "edited post"]}}' --amount 2000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/6AFD71EF70AAE24B5DF0F17CA3FB33463B0E3B7019F6B84E9016114BA2834999
+
+*Test removing editable nature*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"unlock_article":{"post_id":2}}' --from testnet --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/B1032D0E359776D871D3A5CBF53E4D76AB3CF5990519473911E60F2D71094FA0
+
 # Old Migration Example
 
 *Upload for migration*
