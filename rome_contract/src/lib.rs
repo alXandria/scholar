@@ -2,6 +2,8 @@ pub mod contract;
 mod error;
 pub mod msg;
 pub mod state;
-pub mod tests;
 pub use crate::error::ContractError;
 pub mod coin_helpers;
+#[cfg(test)]
+pub mod tests;
+
