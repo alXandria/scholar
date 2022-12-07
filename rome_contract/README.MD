@@ -37,8 +37,35 @@ https://testnet.juno.explorers.guru/transaction/A320F1A87907B40150081E72FFB10D8A
 *Query All Posts*
 junod query wasm contract-state smart juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"all_posts":{}}'
 
+*Query One Post*
+junod query wasm contract-state smart juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"post":{"post_id": 1}}'
 
-# Full Test October 21
+*Register Second Profile Name To Test Edit*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"register_profile_name":{"profile_name":"Satoshi"}}' --from ADDRESS --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/3775985E0D52A1D8AE721F236B59C331B38D1F538EE5B4040836C8E0CB3E1A19
+
+*Register Second Profile*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"create_profile":{"bio":"I am Vitalik, creator of Ethereum", "profile_picture":"www.google.com", "cover_picture":"https://google.com"}}' --from ADDRESS --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/C836BACF5DD2E732358071E4878F402B4F08CB97D1F4AF89DFBFE6600B8FAF88
+
+*Withdraw*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"withdraw":{}}' --from testnet --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/8CFC8E0A9B24160A0F31C5AAC6D686E67A2A2B1E1B9797A1FEAF2905A7630E56
+
+*Test Edit & Fee Split:*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"edit_post":{"post_id":1,"external_id": "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT","text": "This edit should pass!","tags": ["pass", "double funds", "edited post"]}}' --amount 2000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/EEBCE2CAA6D7EB0D600D6E6D9571F9828039F36FB0267AB9DAC48BB95A168AA9
+
+*Test Delete:*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"delete_post":{"post_id":1}}' --amount 10000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
+
+https://testnet.juno.explorers.guru/transaction/555548A718BDE5F6CBBC6E183BC16DB7EBB70B7E3A1C3B912E814B5891177C51
+
+# Old Migration Example
 
 *Upload for migration*
 https://explorer.testnet.sourceprotocol.io/juno/tx/E4EA5F6B0EFB4E1377A5ADF24A4D1B7DF6A8BD71AC65B33F1C1B2348B72A5EDA
@@ -51,20 +78,6 @@ junod tx wasm migrate juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46se
 
 https://explorer.testnet.sourceprotocol.io/juno/tx/01FC12FBC3E2961B470C7397D7A37E5B4A0493817C79CD72F975B6343C3CBF74
 
-*Test Edit & Fee Split:*
-junod tx wasm execute juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46sevje08 '{"edit_post":{"post_id":1,"external_id": "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT","text": "This edit should pass!","tags": ["pass", "double funds", "edited post"]}}' --amount 2000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
 
-https://explorer.testnet.sourceprotocol.io/juno/tx/C1C589FA6D393C1831FF1FEA629B18549B97A4C9F30D65AEFB274AFCC63841C1
 
-*Test Delete:*
-junod tx wasm execute juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46sevje08 '{"delete_post":{"post_id":1}}' --amount 10000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
 
-https://explorer.testnet.sourceprotocol.io/juno/tx/468A1077735D3E778A9F24CAD268FDCD7459B14294BC1EA2FF4F880A19617EEC
-
-*Query One Post*
-junod query wasm contract-state smart juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46sevje08 '{"post":{"post_id": 1}}'
-
-*Withdraw*
-junod tx wasm execute juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46sevje08 '{"withdraw":{}}' --from testnet --fees 500ujunox --gas 200000 -y
-
-https://explorer.testnet.sourceprotocol.io/juno/tx/D627D7FA21D950F1B8120601DD9E59A6ED6D00A0D301D79A1F479054A0020DF3
