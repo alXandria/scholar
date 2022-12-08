@@ -17,8 +17,8 @@ use crate::msg::{
     AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
 };
 use crate::state::{
-    Config, Post, Profile, ProfileName, ADDR_LOOKUP, CONFIG, LAST_POST_ID, POST, PROFILE,
-    PROFILE_NAME,
+    Config, Post, Profile, REVERSE_LOOKUP, CONFIG, LAST_POST_ID, POST, PROFILE,
+    PROFILE_LOOKUP,
 };
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
@@ -60,14 +60,12 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::RegisterProfileName { profile_name } => {
-            execute_register_profile_name(deps, env, info, profile_name)
-        }
         ExecuteMsg::CreateProfile {
+            profile_name,
             bio,
             profile_picture,
             cover_picture,
-        } => execute_create_profile(deps, env, info, bio, profile_picture, cover_picture),
+        } => execute_create_profile(deps, env, info, profile_name, bio, profile_picture, cover_picture),
         ExecuteMsg::CreatePost {
             editable,
             post_title,
@@ -95,69 +93,35 @@ pub fn execute(
         ExecuteMsg::UnlockArticle { post_id } => execute_unlock_article(deps, env, info, post_id),
     }
 }
-fn execute_register_profile_name(
-    deps: DepsMut,
-    _env: Env,
-    info: MessageInfo,
-    profile_name: String,
-) -> Result<Response, ContractError> {
-    let formatted_profile_name = profile_name.trim().to_lowercase();
-    //1) Check to see if there is the desired profile name is registered
-    let check = PROFILE.may_load(deps.storage, formatted_profile_name.clone())?;
-    match check {
-        Some(_check) => Err(ContractError::ProfileNameTaken {
-            taken_profile_name: formatted_profile_name,
-        }),
-        //2) If profile name isn't registered, save it to account
-        None => {
-            let new_profile_name: ProfileName = ProfileName {
-                profile_name: formatted_profile_name,
-                account_address: info.sender,
-            };
-            PROFILE_NAME.save(
-                deps.storage,
-                new_profile_name.profile_name.clone(),
-                &new_profile_name,
-            )?;
-            ADDR_LOOKUP.save(
-                deps.storage,
-                new_profile_name.account_address.clone(),
-                &new_profile_name,
-            )?;
-            Ok(Response::new()
-                .add_attribute("action", "create profile name")
-                .add_attribute("new profile name", new_profile_name.profile_name))
-        }
-    }
-}
 fn execute_create_profile(
     deps: DepsMut,
     _env: Env,
     info: MessageInfo,
+    profile_name: String,
     bio: String,
     profile_picture: String,
     cover_picture: String,
 ) -> Result<Response, ContractError> {
     //query profile name and ensure it is registered to the transactor
-    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
+    let profile_name_check = PROFILE_LOOKUP.may_load(deps.storage, profile_name)?;
     match profile_name_check {
         //if there is a profile name, save the profile and store same profile name to profile
         Some(profile_name_check) => {
+            Err(ContractError::ProfileNameTaken { taken_profile_name: profile_name })
+        }
+        None => {
             let new_profile: Profile = Profile {
-                profile_name: profile_name_check.profile_name,
+                profile_name,
                 bio,
                 profile_picture,
                 cover_picture,
                 account_address: info.sender,
             };
-            PROFILE.save(
-                deps.storage,
-                new_profile.profile_name.to_string(),
-                &new_profile,
-            )?;
-            Ok(Response::new().add_attribute("action", "create profile"))
+            PROFILE.save(deps.storage, info.sender, &new_profile)?;
+            PROFILE_LOOKUP.save(deps.storage, profile_name, &info.sender)?;
+            REVERSE_LOOKUP.save(deps.storage, info.sender, &profile_name)?;
+            Ok(Response::new())
         }
-        None => Err(ContractError::NeedToRegisterProfileName {}),
     }
 }
 //clippy defaults to max value of 7
@@ -183,59 +147,51 @@ fn execute_create_post(
     }
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
-    //check to see if there is a profile name associated with the wallet
-    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
-    match profile_name_check {
-        //if there is a profile name, search for a profile
-        Some(profile_name_check) => {
-            let registered_profile_check =
-                PROFILE.may_load(deps.storage, profile_name_check.profile_name)?;
-            match registered_profile_check {
-                //if there is a profile allow the user to create a post
-                Some(registered_profile_check) => {
-                    let post: Post = Post {
-                        editable,
-                        post_id: incremented_id,
-                        post_title,
-                        external_id,
-                        text,
-                        tags,
-                        author: registered_profile_check.profile_name.clone(),
-                        creation_date: env.block.time.to_string(),
-                        last_edit_date: None,
-                        editor: None,
-                    };
-                    //check to see whether the user elected to make the post editable or not,
-                    //this effects the price
-                    match post.editable {
-                        true => {
-                            assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
-                            LAST_POST_ID.save(deps.storage, &incremented_id)?;
-                            POST.save(deps.storage, post.post_id, &post)?;
-                            Ok(Response::new()
-                                .add_attribute("action", "create_post")
-                                .add_attribute("post_id", post.post_id.to_string())
-                                .add_attribute("author", registered_profile_check.profile_name))
-                        }
-                        false => {
-                            //increased fee
-                            assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
-                            LAST_POST_ID.save(deps.storage, &incremented_id)?;
-                            POST.save(deps.storage, post.post_id, &post)?;
-                            Ok(Response::new()
-                                .add_attribute("action", "create_post")
-                                .add_attribute("post_id", post.post_id.to_string())
-                                .add_attribute("author", registered_profile_check.profile_name))
-                        }
-                    }
+    //check to see if there is a profile
+    let registered_profile_check =
+        PROFILE.may_load(deps.storage, info.sender)?;
+    match registered_profile_check {
+        //if there is a profile allow the user to create a post
+        Some(registered_profile_check) => {
+            let post: Post = Post {
+                editable,
+                post_id: incremented_id,
+                post_title,
+                external_id,
+                text,
+                tags,
+                author: registered_profile_check.profile_name.clone(),
+                creation_date: env.block.time.to_string(),
+                last_edit_date: None,
+                editor: None,
+            };
+            //check to see whether the user elected to make the post editable or not,
+            //this effects the price
+            match post.editable {
+                true => {
+                    assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
+                    LAST_POST_ID.save(deps.storage, &incremented_id)?;
+                    POST.save(deps.storage, post.post_id, &post)?;
+                    Ok(Response::new()
+                        .add_attribute("action", "create_post")
+                        .add_attribute("post_id", post.post_id.to_string())
+                        .add_attribute("author", registered_profile_check.profile_name))
                 }
-                None => Err(ContractError::NeedToRegisterProfile {}),
+                false => {
+                    //increased fee
+                    assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
+                    LAST_POST_ID.save(deps.storage, &incremented_id)?;
+                    POST.save(deps.storage, post.post_id, &post)?;
+                    Ok(Response::new()
+                        .add_attribute("action", "create_post")
+                        .add_attribute("post_id", post.post_id.to_string())
+                        .add_attribute("author", registered_profile_check.profile_name))
+                }
             }
         }
-        None => Err(ContractError::NeedToRegisterProfileName {}),
+        None => Err(ContractError::NeedToRegisterProfile {}),
     }
 }
-
 fn execute_edit_post(
     deps: DepsMut,
     env: Env,
