@@ -287,11 +287,12 @@ fn execute_delete_post(
     match post {
         Some(post) => {
             //see if sender is original author
-            if info.sender == post.author {
+            let post_author = PROFILE_LOOKUP.load(deps.storage, post.author)?;
+            if info.sender == post_author {
                 POST.remove(deps.storage, post_id);
                 Ok(Response::new().add_attribute("delete post", post_id.to_string()))
             } else {
-                println!("{}", post.author);
+                println!("{}", post_author);
                 println!("{}", info.sender);
                 Err(ContractError::UnauthorizedEdit {})
             }

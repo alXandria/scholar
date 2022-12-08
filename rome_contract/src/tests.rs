@@ -565,6 +565,8 @@ fn test_execute_unlock_article() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //switch info to ADDR2 for post creation
+    let info = mock_info(ADDR2, &[]);
     //register profile
     let msg = ExecuteMsg::CreateProfile {
         profile_name: "savage".to_string(),
