@@ -148,8 +148,7 @@ fn execute_create_post(
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
     //check to see if there is a profile
-    let registered_profile_check =
-        PROFILE.may_load(deps.storage, info.sender)?;
+    let registered_profile_check = PROFILE.may_load(deps.storage, info.sender)?;
     match registered_profile_check {
         //if there is a profile allow the user to create a post
         Some(registered_profile_check) => {
@@ -212,91 +211,68 @@ fn execute_edit_post(
         return Err(ContractError::MustUseAlxandriaGateway {});
     }
     //check to see if there is a profile name associated with the wallet
-    let profile_name_check = ADDR_LOOKUP.may_load(deps.storage, info.sender)?;
-    match profile_name_check {
-        //if there is a profile name, search for a profile
-        Some(profile_name_check) => {
-            let registered_profile_check =
-                PROFILE.may_load(deps.storage, profile_name_check.profile_name.clone())?;
-            match registered_profile_check {
-                //if there is a profile, load the original post
-                Some(registered_profile_check) => {
-                    let post = POST.load(deps.storage, post_id)?;
-                    let editable_post = post.editable;
-                    //If post is editable, allow user to edit
-                    match editable_post {
-                        true => {
-                            let new_post: Post = Post {
-                                editable: post.editable,
-                                post_id: post.post_id,
-                                post_title: post.post_title,
-                                external_id,
-                                text,
-                                tags,
-                                author: post.author.clone(),
-                                creation_date: post.creation_date,
-                                last_edit_date: Some(env.block.time.to_string()),
-                                editor: Some(registered_profile_check.profile_name),
-                            };
-                            POST.save(deps.storage, post_id, &new_post)?;
-                            //original author profile is searched based on stored profile name
-                            let original_author_lookup =
-                                PROFILE_NAME.load(deps.storage, post.author)?;
-                            //wallet address is retrieved from profile name map
-                            let original_author_address = original_author_lookup.account_address;
-                            //fund share is sent to original author
-                            let share = BankMsg::Send {
-                                to_address: original_author_address.to_string(),
-                                amount: vec![coin(500_000, JUNO)],
-                            };
-                            Ok(Response::new()
-                                .add_message(share)
-                                .add_attribute("action", "edit_post")
-                                .add_attribute("post_id", new_post.post_id.to_string())
-                                .add_attribute("editor", new_post.editor.unwrap()))
-                        }
-                        //if post is not editable, see if sender is original author
-                        false => {
-                            if profile_name_check.profile_name == post.author {
-                                let new_post: Post = Post {
-                                    editable: post.editable,
-                                    post_id: post.post_id,
-                                    post_title: post.post_title,
-                                    external_id,
-                                    text,
-                                    tags,
-                                    author: post.author.clone(),
-                                    creation_date: post.creation_date,
-                                    last_edit_date: Some(env.block.time.to_string()),
-                                    editor: Some(registered_profile_check.profile_name),
-                                };
-                                POST.save(deps.storage, post_id, &new_post)?;
-                                //original author profile is searched based on stored profile name
-                                let original_author_lookup =
-                                    PROFILE_NAME.load(deps.storage, post.author)?;
-                                //wallet address is retrieved from profile name map
-                                let original_author_address =
-                                    original_author_lookup.account_address;
-                                //fund share is sent to original author
-                                let share = BankMsg::Send {
-                                    to_address: original_author_address.to_string(),
-                                    amount: vec![coin(500_000, JUNO)],
-                                };
-                                Ok(Response::new()
-                                    .add_message(share)
-                                    .add_attribute("action", "edit_post")
-                                    .add_attribute("post_id", new_post.post_id.to_string())
-                                    .add_attribute("editor", new_post.editor.unwrap()))
-                            } else {
-                                Err(ContractError::UnauthorizedEdit {})
-                            }
-                        }
+    let registered_profile_check = PROFILE.may_load(deps.storage, info.sender)?;
+    match registered_profile_check {
+        //if there is a profile, load the original post
+        Some(registered_profile_check) => {
+            let post = POST.load(deps.storage, post_id)?;
+            //If post is editable, allow user to edit
+            match post.editable {
+                true => {
+                    let new_post: Post = Post {
+                        editable: post.editable,
+                        post_id: post.post_id,
+                        post_title: post.post_title,
+                        external_id,
+                        text,
+                        tags,
+                        author: post.author.clone(),
+                        creation_date: post.creation_date,
+                        last_edit_date: Some(env.block.time.to_string()),
+                        editor: Some(registered_profile_check.profile_name),
+                    };
+                    POST.save(deps.storage, post_id, &new_post)?;
+                    //original author address is searched based on stored profile name
+                    let original_author_lookup =
+                        PROFILE_LOOKUP.load(deps.storage, post.author)?;
+                    //fund share is sent to original author
+                    let share = BankMsg::Send {
+                        to_address: original_author_lookup.to_string(),
+                        amount: vec![coin(500_000, JUNO)],
+                    };
+                    Ok(Response::new()
+                        .add_message(share)
+                        .add_attribute("action", "edit_post")
+                        .add_attribute("post_id", new_post.post_id.to_string())
+                        .add_attribute("editor", new_post.editor.unwrap()))
+                }
+                //if post is not editable, see if sender is original author
+                false => {
+                    if registered_profile_check.profile_name == post.author {
+                        let new_post: Post = Post {
+                            editable: post.editable,
+                            post_id: post.post_id,
+                            post_title: post.post_title,
+                            external_id,
+                            text,
+                            tags,
+                            author: post.author.clone(),
+                            creation_date: post.creation_date,
+                            last_edit_date: Some(env.block.time.to_string()),
+                            editor: Some(registered_profile_check.profile_name),
+                        };
+                        POST.save(deps.storage, post_id, &new_post)?;
+                        Ok(Response::new()
+                            .add_attribute("action", "edit_post")
+                            .add_attribute("post_id", new_post.post_id.to_string())
+                            .add_attribute("editor", new_post.editor.unwrap()))
+                    } else {
+                        Err(ContractError::UnauthorizedEdit {})
                     }
                 }
-                None => Err(ContractError::NeedToRegisterProfile {}),
             }
         }
-        None => Err(ContractError::NeedToRegisterProfileName {}),
+        None => Err(ContractError::NeedToRegisterProfile {}),
     }
 }
 fn execute_delete_post(
