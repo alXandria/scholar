@@ -103,22 +103,22 @@ fn execute_create_profile(
     cover_picture: String,
 ) -> Result<Response, ContractError> {
     //query profile name and ensure it is registered to the transactor
-    let profile_name_check = PROFILE_LOOKUP.may_load(deps.storage, profile_name)?;
+    let profile_name_check = PROFILE_LOOKUP.may_load(deps.storage, profile_name.clone())?;
     match profile_name_check {
         //if there is a profile name, save the profile and store same profile name to profile
-        Some(profile_name_check) => {
+        Some(_profile_name_check) => {
             Err(ContractError::ProfileNameTaken { taken_profile_name: profile_name })
         }
         None => {
             let new_profile: Profile = Profile {
-                profile_name,
+                profile_name: profile_name.clone(),
                 bio,
                 profile_picture,
                 cover_picture,
-                account_address: info.sender,
+                account_address: info.sender.clone(),
             };
-            PROFILE.save(deps.storage, info.sender, &new_profile)?;
-            PROFILE_LOOKUP.save(deps.storage, profile_name, &info.sender)?;
+            PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
+            PROFILE_LOOKUP.save(deps.storage, profile_name.clone(), &info.sender)?;
             REVERSE_LOOKUP.save(deps.storage, info.sender, &profile_name)?;
             Ok(Response::new())
         }
@@ -286,19 +286,13 @@ fn execute_delete_post(
     match post {
         Some(post) => {
             //see if sender is original author
-            let author = ADDR_LOOKUP.may_load(deps.storage, info.sender.clone())?;
-            match author {
-                Some(author) => {
-                    if author.profile_name == post.author {
-                        POST.remove(deps.storage, post_id);
-                        Ok(Response::new().add_attribute("delete post", post_id.to_string()))
-                    } else {
-                        println!("{}", post.author);
-                        println!("{}", info.sender);
-                        Err(ContractError::UnauthorizedEdit {})
-                    }
-                }
-                None => Err(ContractError::NeedToRegisterProfileName {}),
+            if info.sender == post.author {
+                POST.remove(deps.storage, post_id);
+                Ok(Response::new().add_attribute("delete post", post_id.to_string()))
+            } else {
+                println!("{}", post.author);
+                println!("{}", info.sender);
+                Err(ContractError::UnauthorizedEdit {})
             }
         }
         None => Err(ContractError::PostDoesNotExist {}),
