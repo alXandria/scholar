@@ -61,13 +61,9 @@ fn test_execute_create_post_valid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "Vitalik".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -100,13 +96,9 @@ fn test_execute_create_post_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "Vital ik".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -138,13 +130,9 @@ fn test_execute_edit_post_valid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "satoshi".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -189,13 +177,9 @@ fn test_execute_edit_post_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "satonkers".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -237,13 +221,9 @@ fn test_execute_delete_post_valid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "destuct".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -287,13 +267,9 @@ fn test_execute_delete_post_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "domination".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -330,13 +306,9 @@ fn test_execute_delete_post_uneditable() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "savagery".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -374,13 +346,9 @@ fn test_withdraw_valid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "annihilation".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -414,13 +382,9 @@ fn test_withdraw_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "after".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -455,13 +419,9 @@ fn test_query_all_posts() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "MoN A R".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -512,13 +472,9 @@ fn test_query_post() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "donkey".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -551,22 +507,6 @@ fn test_query_post() {
     assert!(res.post.is_none());
 }
 #[test]
-fn test_register_profile_name() {
-    let mut deps = mock_dependencies();
-    let env = mock_env();
-    let info = mock_info(ADDR1, &[]);
-    //instantiate
-    let msg = InstantiateMsg {
-        admin: ADDR1.to_string(),
-    };
-    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env, info, msg).unwrap();
-}
-#[test]
 fn test_create_profile() {
     let mut deps = mock_dependencies();
     let env = mock_env();
@@ -576,13 +516,9 @@ fn test_create_profile() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "finish hu m".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -599,13 +535,9 @@ fn test_register_profile_name_fails() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
-    //register profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "Champ".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
@@ -614,8 +546,11 @@ fn test_register_profile_name_fails() {
     //set info to different addresss than who has the registered profile name Champ
     let info = mock_info(ADDR2, &[]);
     //attempt to register same profile name
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
+    let msg = ExecuteMsg::CreateProfile { 
+        profile_name: "Champ".to_string(), 
+        bio: "anything".to_string(), 
+        profile_picture: "anything".to_string(), 
+        cover_picture: "anything".to_string(), 
     };
     //expect it to fail due to collision
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
@@ -629,15 +564,12 @@ fn test_execute_unlock_article() {
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
-    //register profile name
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //switch info to ADDR2 for post creation
     let info = mock_info(ADDR2, &[]);
-    let msg = ExecuteMsg::RegisterProfileName {
-        profile_name: "Champ".to_string(),
-    };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
+        profile_name: "savage".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),

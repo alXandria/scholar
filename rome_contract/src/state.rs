@@ -11,12 +11,6 @@ pub struct Config {
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub struct ProfileName {
-    pub profile_name: String,
-    pub account_address: Addr,
-}
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
 pub struct Profile {
     pub profile_name: String,
     pub bio: String,
@@ -47,6 +41,6 @@ pub const CONFIG: Item<Config> = Item::new("config");
 //create a map of post. Addr is creator. u64 is post_id
 pub const POST: Map<u64, Post> = Map::new("post");
 pub const LAST_POST_ID: Item<u64> = Item::new("last_post_id");
-pub const PROFILE: Map<String, Profile> = Map::new("profile");
-pub const PROFILE_NAME: Map<String, ProfileName> = Map::new("profile_name");
-pub const ADDR_LOOKUP: Map<Addr, ProfileName> = Map::new("lookup_profile_name");
+pub const PROFILE: Map<Addr, Profile> = Map::new("profile");
+pub const PROFILE_LOOKUP: Map<String, Addr> = Map::new("profile_name");
+pub const REVERSE_LOOKUP: Map<Addr, String> = Map::new("lookup_profile_name");
