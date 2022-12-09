@@ -16,7 +16,7 @@ pub struct Profile {
     pub bio: String,
     pub profile_picture: String,
     pub cover_picture: String,
-    pub account_address: String,
+    pub account_address: Addr,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]

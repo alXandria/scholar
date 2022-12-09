@@ -4,12 +4,8 @@
 junod tx wasm store alxandria.wasm --from testnet --fees 500ujunox --gas 2000000 --instantiate-only-address juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4 -y
 
 *Code ID*
+3253
 
-
-*Migrate*
-junod tx wasm migrate juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh 3252 '{"migrate_msg":{}}' --from testnet --fees 500ujunox --gas 2000000 -y
-
-https://testnet.juno.explorers.guru/transaction/9535C4B6DF801AC588EDDDE501B6903DAA695ECB0062F792F535347FCB8A7170
 
 *Query All Posts*
 junod query wasm contract-state smart juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"all_posts":{}}'

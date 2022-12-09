@@ -124,7 +124,7 @@ fn execute_create_profile(
                 bio,
                 profile_picture,
                 cover_picture,
-                account_address: info.sender.to_string(),
+                account_address: info.sender.clone(),
             };
             PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
             PROFILE_LOOKUP.save(deps.storage, formatted_profile_name.clone(), &info.sender)?;
