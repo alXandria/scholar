@@ -1,3 +1,27 @@
+# Enterprise Test December 9
+
+*Store With Instantiation Limitation:*
+junod tx wasm store alxandria.wasm --from testnet --fees 500ujunox --gas 2000000 --instantiate-only-address juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4 -y
+
+*Code ID*
+3252
+
+*Migrate*
+junod tx wasm migrate juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh 3252 '{"migrate_msg":{}}' --from testnet --fees 500ujunox --gas 2000000 -y
+
+https://testnet.juno.explorers.guru/transaction/9535C4B6DF801AC588EDDDE501B6903DAA695ECB0062F792F535347FCB8A7170
+
+*Query All Posts*
+junod query wasm contract-state smart juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"all_posts":{}}'
+
+*Register Profile*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"create_profile":{"profile_name":"Vitalik","bio":"a beast man","profile_picture":"placeholder","cover_picture":"placeholder"}}' --from testnet --fees 500ujunox --gas 200000 -y
+
+
+
+*Create Another Post:*
+junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"create_post":{"editable":true,"post_title":"Post 3","external_id":"https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT","text":"This post should pass!","tags":["pass","funds","attempt"]}}' --amount 1000000ujunox --from testnet --fees 500ujunox --gas 200000 -y
+
 # Enterprise Test December 6
 
 *Store With Instantiation Limitation:*

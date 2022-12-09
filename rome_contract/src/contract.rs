@@ -110,14 +110,16 @@ fn execute_create_profile(
     cover_picture: String,
 ) -> Result<Response, ContractError> {
     //query profile name and ensure it is registered to the transactor
-    let formatted_profile_name = profile_name.trim().to_lowercase().replace(" ", "to");
+    let formatted_profile_name = profile_name.trim().to_lowercase().replace(" ", "");
     let profile_name_check =
         PROFILE_LOOKUP.may_load(deps.storage, formatted_profile_name.clone())?;
     match profile_name_check {
         //if there is a profile name, save the profile and store same profile name to profile
-        Some(_profile_name_check) => Err(ContractError::ProfileNameTaken {
+        Some(_profile_name_check) => {
+            Err(ContractError::ProfileNameTaken {
             taken_profile_name: formatted_profile_name,
-        }),
+        })
+    },
         None => {
             let new_profile: Profile = Profile {
                 profile_name: formatted_profile_name.clone(),
