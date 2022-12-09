@@ -115,18 +115,16 @@ fn execute_create_profile(
         PROFILE_LOOKUP.may_load(deps.storage, formatted_profile_name.clone())?;
     match profile_name_check {
         //if there is a profile name, save the profile and store same profile name to profile
-        Some(_profile_name_check) => {
-            Err(ContractError::ProfileNameTaken {
+        Some(_profile_name_check) => Err(ContractError::ProfileNameTaken {
             taken_profile_name: formatted_profile_name,
-        })
-    },
+        }),
         None => {
             let new_profile: Profile = Profile {
                 profile_name: formatted_profile_name.clone(),
                 bio,
                 profile_picture,
                 cover_picture,
-                account_address: info.sender.clone(),
+                account_address: info.sender.to_string(),
             };
             PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
             PROFILE_LOOKUP.save(deps.storage, formatted_profile_name.clone(), &info.sender)?;

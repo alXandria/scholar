@@ -4,7 +4,7 @@
 junod tx wasm store alxandria.wasm --from testnet --fees 500ujunox --gas 2000000 --instantiate-only-address juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4 -y
 
 *Code ID*
-3252
+
 
 *Migrate*
 junod tx wasm migrate juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh 3252 '{"migrate_msg":{}}' --from testnet --fees 500ujunox --gas 2000000 -y
@@ -16,7 +16,6 @@ junod query wasm contract-state smart juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd
 
 *Register Profile*
 junod tx wasm execute juno1wfjhqdekmqnak2mdwasrdcmr8js6zeaz5hwcd0arvs4se4v2stxqe2gruh '{"create_profile":{"profile_name":"Vitalik","bio":"a beast man","profile_picture":"placeholder","cover_picture":"placeholder"}}' --from testnet --fees 500ujunox --gas 200000 -y
-
 
 
 *Create Another Post:*
