@@ -14,10 +14,12 @@ use std::{env, vec};
 use crate::coin_helpers::assert_sent_exact_coin;
 use crate::error::ContractError;
 use crate::msg::{
-    AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
+    AllPostsResponse, ArticleCountResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse,
+    QueryMsg,
 };
 use crate::state::{
-    Config, Post, Profile, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP, REVERSE_LOOKUP,
+    Config, Post, Profile, ARTICLE_COUNT, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP,
+    REVERSE_LOOKUP,
 };
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
@@ -46,6 +48,7 @@ pub fn instantiate(
     };
     CONFIG.save(deps.storage, &config)?;
     LAST_POST_ID.save(deps.storage, &0)?;
+    ARTICLE_COUNT.save(deps.storage, &0)?;
     Ok(Response::new()
         .add_attribute("action", "instantiate")
         .add_attribute("admin", validated_admin.to_string()))
@@ -156,6 +159,8 @@ fn execute_create_post(
     }
     let last_post_id = LAST_POST_ID.load(deps.storage)?;
     let incremented_id = last_post_id + 1;
+    let counter = ARTICLE_COUNT.load(deps.storage)?;
+    let updated_counter = counter + 1;
     //check to see if there is a profile
     let registered_profile_check = PROFILE.may_load(deps.storage, info.sender)?;
     match registered_profile_check {
@@ -180,6 +185,7 @@ fn execute_create_post(
                     assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
                     LAST_POST_ID.save(deps.storage, &incremented_id)?;
                     POST.save(deps.storage, post.post_id, &post)?;
+                    ARTICLE_COUNT.save(deps.storage, &updated_counter)?;
                     Ok(Response::new()
                         .add_attribute("action", "create_post")
                         .add_attribute("post_id", post.post_id.to_string())
@@ -190,6 +196,7 @@ fn execute_create_post(
                     assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
                     LAST_POST_ID.save(deps.storage, &incremented_id)?;
                     POST.save(deps.storage, post.post_id, &post)?;
+                    ARTICLE_COUNT.save(deps.storage, &updated_counter)?;
                     Ok(Response::new()
                         .add_attribute("action", "create_post")
                         .add_attribute("post_id", post.post_id.to_string())
@@ -296,6 +303,9 @@ fn execute_delete_post(
             //see if sender is original author
             let post_author = PROFILE_LOOKUP.load(deps.storage, post.author)?;
             if info.sender == post_author {
+                let counter = ARTICLE_COUNT.load(deps.storage)?;
+                let updated_counter = counter - 1;
+                ARTICLE_COUNT.save(deps.storage, &updated_counter)?;
                 POST.remove(deps.storage, post_id);
                 Ok(Response::new().add_attribute("delete post", post_id.to_string()))
             } else {
@@ -354,6 +364,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::AllPosts { limit, start_after } => query_all_posts(deps, env, limit, start_after),
         QueryMsg::Post { post_id } => query_post(deps, env, post_id),
+        QueryMsg::ArticleCount {} => query_article_count(deps, env),
     }
 }
 
@@ -382,7 +393,10 @@ fn query_post(deps: Deps, _env: Env, post_id: u64) -> StdResult<Binary> {
     let post = POST.may_load(deps.storage, post_id)?;
     to_binary(&PostResponse { post })
 }
-
+fn query_article_count(deps: Deps, _env: Env) -> StdResult<Binary> {
+    let article_count = ARTICLE_COUNT.load(deps.storage)?;
+    to_binary(&ArticleCountResponse { article_count })
+}
 #[entry_point]
 pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
     let ver = get_contract_version(deps.storage)?;
