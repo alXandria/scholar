@@ -546,11 +546,11 @@ fn test_register_profile_name_fails() {
     //set info to different addresss than who has the registered profile name Champ
     let info = mock_info(ADDR2, &[]);
     //attempt to register same profile name
-    let msg = ExecuteMsg::CreateProfile { 
-        profile_name: "Champ".to_string(), 
-        bio: "anything".to_string(), 
-        profile_picture: "anything".to_string(), 
-        cover_picture: "anything".to_string(), 
+    let msg = ExecuteMsg::CreateProfile {
+        profile_name: "Champ".to_string(),
+        bio: "anything".to_string(),
+        profile_picture: "anything".to_string(),
+        cover_picture: "anything".to_string(),
     };
     //expect it to fail due to collision
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
@@ -564,7 +564,7 @@ fn test_execute_unlock_article() {
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
     };
-    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
     //switch info to ADDR2 for post creation
     let info = mock_info(ADDR2, &[]);
     //register profile

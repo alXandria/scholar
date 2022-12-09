@@ -17,8 +17,7 @@ use crate::msg::{
     AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
 };
 use crate::state::{
-    Config, Post, Profile, REVERSE_LOOKUP, CONFIG, LAST_POST_ID, POST, PROFILE,
-    PROFILE_LOOKUP,
+    Config, Post, Profile, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP, REVERSE_LOOKUP,
 };
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
@@ -65,7 +64,15 @@ pub fn execute(
             bio,
             profile_picture,
             cover_picture,
-        } => execute_create_profile(deps, env, info, profile_name, bio, profile_picture, cover_picture),
+        } => execute_create_profile(
+            deps,
+            env,
+            info,
+            profile_name,
+            bio,
+            profile_picture,
+            cover_picture,
+        ),
         ExecuteMsg::CreatePost {
             editable,
             post_title,
@@ -104,12 +111,13 @@ fn execute_create_profile(
 ) -> Result<Response, ContractError> {
     //query profile name and ensure it is registered to the transactor
     let formatted_profile_name = profile_name.trim().to_lowercase().replace(" ", "to");
-    let profile_name_check = PROFILE_LOOKUP.may_load(deps.storage, formatted_profile_name.clone())?;
+    let profile_name_check =
+        PROFILE_LOOKUP.may_load(deps.storage, formatted_profile_name.clone())?;
     match profile_name_check {
         //if there is a profile name, save the profile and store same profile name to profile
-        Some(_profile_name_check) => {
-            Err(ContractError::ProfileNameTaken { taken_profile_name: formatted_profile_name })
-        }
+        Some(_profile_name_check) => Err(ContractError::ProfileNameTaken {
+            taken_profile_name: formatted_profile_name,
+        }),
         None => {
             let new_profile: Profile = Profile {
                 profile_name: formatted_profile_name.clone(),
@@ -234,8 +242,7 @@ fn execute_edit_post(
                     };
                     POST.save(deps.storage, post_id, &new_post)?;
                     //original author address is searched based on stored profile name
-                    let original_author_lookup =
-                        PROFILE_LOOKUP.load(deps.storage, post.author)?;
+                    let original_author_lookup = PROFILE_LOOKUP.load(deps.storage, post.author)?;
                     //fund share is sent to original author
                     let share = BankMsg::Send {
                         to_address: original_author_lookup.to_string(),

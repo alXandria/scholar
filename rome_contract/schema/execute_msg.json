@@ -5,26 +5,6 @@
     {
       "type": "object",
       "required": [
-        "register_profile_name"
-      ],
-      "properties": {
-        "register_profile_name": {
-          "type": "object",
-          "required": [
-            "profile_name"
-          ],
-          "properties": {
-            "profile_name": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    {
-      "type": "object",
-      "required": [
         "create_profile"
       ],
       "properties": {
@@ -33,6 +13,7 @@
           "required": [
             "bio",
             "cover_picture",
+            "profile_name",
             "profile_picture"
           ],
           "properties": {
@@ -40,6 +21,9 @@
               "type": "string"
             },
             "cover_picture": {
+              "type": "string"
+            },
+            "profile_name": {
               "type": "string"
             },
             "profile_picture": {
