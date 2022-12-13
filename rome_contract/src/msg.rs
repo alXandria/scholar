@@ -54,6 +54,11 @@ pub struct ArticleCountResponse {
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+pub struct ProfileNameResponse {
+    pub profile_name: Option<String>,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
     AllPosts {
         limit: Option<u32>,
@@ -63,6 +68,9 @@ pub enum QueryMsg {
         post_id: u64,
     },
     ArticleCount {},
+    ProfileName {
+        address: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
