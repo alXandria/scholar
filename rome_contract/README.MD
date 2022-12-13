@@ -1,5 +1,14 @@
 # Migrate for profile name query
 
+*Code ID*
+3378
+
+*Migrate*
+junod tx wasm migrate juno1a822ztnp3nxpfvk36tv8e2765t0x6vpd9ct5t7rn30w9azhmqr4q0rzgsd 3378 '{"migrate_msg":{}}' --from testnet --fees 500ujunox --gas 2000000 -y
+
+*Query Profile Name*
+junod query wasm contract-state smart juno1a822ztnp3nxpfvk36tv8e2765t0x6vpd9ct5t7rn30w9azhmqr4q0rzgsd '{"profile_name":{"address":"juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4"}}'
+
 # Enterprise Test December 9
 
 *Store With Instantiation Limitation:*
@@ -75,18 +84,6 @@ junod tx wasm execute juno1a822ztnp3nxpfvk36tv8e2765t0x6vpd9ct5t7rn30w9azhmqr4q0
 
 https://testnet.juno.explorers.guru/transaction/8769EDB37718E0BDD9F81D04DAE636FCA931E85985F812097550F0FDDEE56C60
 
-# Old Migration Example
-
-*Upload for migration*
-https://explorer.testnet.sourceprotocol.io/juno/tx/E4EA5F6B0EFB4E1377A5ADF24A4D1B7DF6A8BD71AC65B33F1C1B2348B72A5EDA
-
-*Code ID*
-1258
-
-*Migrate*
-junod tx wasm migrate juno1apd88gqrqms48n3nvkcnxsttt86w02syk4n4t9we0sadqwh9x46sevje08 1258 '{"migrate_msg":{}}' --from testnet --fees 500ujunox --gas 2000000 -y
-
-https://explorer.testnet.sourceprotocol.io/juno/tx/01FC12FBC3E2961B470C7397D7A37E5B4A0493817C79CD72F975B6343C3CBF74
 
 
 
