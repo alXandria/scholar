@@ -144,7 +144,6 @@ fn execute_create_profile(
                 bio,
                 profile_picture,
                 cover_picture,
-                account_address: info.sender.clone(),
             };
             PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
             PROFILE_LOOKUP.save(deps.storage, formatted_profile_name.clone(), &info.sender)?;
@@ -380,6 +379,8 @@ fn execute_unlock_article(
     POST.save(deps.storage, post_id, &unlocked_article)?;
     Ok(Response::new().add_attribute("Unlocked Article", unlocked_article.post_id.to_string()))
 }
+//clippy defaults to max value of 7
+#[allow(clippy::too_many_arguments)]
 fn execute_admin_create_profile(
     deps: DepsMut,
     _env: Env,
@@ -403,7 +404,6 @@ fn execute_admin_create_profile(
         bio,
         profile_picture,
         cover_picture,
-        account_address: info.sender.clone(),
     };
     PROFILE.save(deps.storage, validated_address.clone(), &new_profile)?;
     PROFILE_LOOKUP.save(
