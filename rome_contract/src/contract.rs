@@ -113,6 +113,7 @@ fn execute_create_profile(
     cover_picture: String,
 ) -> Result<Response, ContractError> {
     //query profile name and ensure it is registered to the transactor
+    #[allow(clippy::single_char_pattern)]
     let formatted_profile_name = profile_name.trim().to_lowercase().replace(" ", "");
     let profile_name_check =
         PROFILE_LOOKUP.may_load(deps.storage, formatted_profile_name.clone())?;
@@ -387,7 +388,6 @@ fn query_all_posts(
         .take(limit)
         .map(|p| Ok(p?.1))
         .collect::<StdResult<Vec<_>>>()?;
-
     to_binary(&AllPostsResponse { posts })
 }
 
