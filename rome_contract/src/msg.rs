@@ -17,6 +17,13 @@ pub enum ExecuteMsg {
         profile_picture: String,
         cover_picture: String,
     },
+    AdminCreateProfile {
+        address: String,
+        profile_name: String,
+        bio: String,
+        profile_picture: String,
+        cover_picture: String,
+    },
     CreatePost {
         editable: bool,
         post_title: String,

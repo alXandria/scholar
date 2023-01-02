@@ -101,6 +101,22 @@ pub fn execute(
         ExecuteMsg::DeletePost { post_id } => execute_delete_post(deps, env, info, post_id),
         ExecuteMsg::WithdrawJuno {} => execute_withdraw_juno(deps, env, info),
         ExecuteMsg::UnlockArticle { post_id } => execute_unlock_article(deps, env, info, post_id),
+        ExecuteMsg::AdminCreateProfile {
+            address,
+            profile_name,
+            bio,
+            profile_picture,
+            cover_picture,
+        } => execute_admin_create_profile(
+            deps,
+            env,
+            info,
+            address,
+            profile_name,
+            bio,
+            profile_picture,
+            cover_picture,
+        ),
     }
 }
 fn execute_create_profile(
@@ -363,6 +379,40 @@ fn execute_unlock_article(
     };
     POST.save(deps.storage, post_id, &unlocked_article)?;
     Ok(Response::new().add_attribute("Unlocked Article", unlocked_article.post_id.to_string()))
+}
+fn execute_admin_create_profile(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    address: String,
+    profile_name: String,
+    bio: String,
+    profile_picture: String,
+    cover_picture: String,
+) -> Result<Response, ContractError> {
+    if info.sender != ADMIN {
+        return Err(ContractError::Unauthorized {});
+    }
+    //validate address
+    let validated_address = deps.api.addr_validate(&address)?;
+    //format profile name
+    #[allow(clippy::single_char_pattern)]
+    let formatted_profile_name = profile_name.trim().to_lowercase().replace(" ", "");
+    let new_profile: Profile = Profile {
+        profile_name: formatted_profile_name.clone(),
+        bio,
+        profile_picture,
+        cover_picture,
+        account_address: info.sender.clone(),
+    };
+    PROFILE.save(deps.storage, validated_address.clone(), &new_profile)?;
+    PROFILE_LOOKUP.save(
+        deps.storage,
+        formatted_profile_name.clone(),
+        &validated_address,
+    )?;
+    REVERSE_LOOKUP.save(deps.storage, validated_address, &formatted_profile_name)?;
+    Ok(Response::new())
 }
 
 #[entry_point]

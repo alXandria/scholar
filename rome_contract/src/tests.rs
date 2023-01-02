@@ -88,6 +88,25 @@ fn test_execute_create_post_valid() {
     let _res = execute(deps.as_mut(), env, info, msg).unwrap();
 }
 #[test]
+fn test_execute_admin_create_profile() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+    //instatiate
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //register profile
+    let msg = ExecuteMsg::CreateProfile {
+        profile_name: "Vitalik".to_string(),
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+}
+#[test]
 fn test_execute_create_post_invalid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
