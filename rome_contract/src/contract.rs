@@ -3,7 +3,7 @@
 // 2) Delete any whitespace in profile name?
 
 use cosmwasm_std::{
-    coin, entry_point, to_binary, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Order,
+    coin, entry_point, to_binary, BankMsg, Binary, Deps, DepsMut, Env, MessageInfo, Order,
     Response, StdError, StdResult,
 };
 use cw2::{get_contract_version, set_contract_version};
@@ -99,7 +99,7 @@ pub fn execute(
             tags,
         } => execute_edit_post(deps, env, info, post_id, external_id, text, tags),
         ExecuteMsg::DeletePost { post_id } => execute_delete_post(deps, env, info, post_id),
-        ExecuteMsg::Withdraw {} => execute_withdraw(deps, env, info),
+        ExecuteMsg::WithdrawJuno {} => execute_withdraw_juno(deps, env, info),
         ExecuteMsg::UnlockArticle { post_id } => execute_unlock_article(deps, env, info, post_id),
     }
 }
@@ -182,7 +182,7 @@ fn execute_create_post(
             //this effects the price
             match post.editable {
                 true => {
-                    assert_sent_exact_coin(&info.funds, Some(coin(1_000_000, JUNO)))?;
+                    assert_sent_exact_coin(&info.funds, Some(vec![coin(1_000_000, JUNO)]))?;
                     LAST_POST_ID.save(deps.storage, &incremented_id)?;
                     POST.save(deps.storage, post.post_id, &post)?;
                     ARTICLE_COUNT.save(deps.storage, &updated_counter)?;
@@ -193,7 +193,7 @@ fn execute_create_post(
                 }
                 false => {
                     //increased fee
-                    assert_sent_exact_coin(&info.funds, Some(coin(5_000_000, JUNO)))?;
+                    assert_sent_exact_coin(&info.funds, Some(vec![coin(5_000_000, JUNO)]))?;
                     LAST_POST_ID.save(deps.storage, &incremented_id)?;
                     POST.save(deps.storage, post.post_id, &post)?;
                     ARTICLE_COUNT.save(deps.storage, &updated_counter)?;
@@ -216,7 +216,7 @@ fn execute_edit_post(
     text: String,
     tags: Vec<String>,
 ) -> Result<Response, ContractError> {
-    assert_sent_exact_coin(&info.funds, Some(Coin::new(2_000_000, JUNO)))?;
+    assert_sent_exact_coin(&info.funds, Some(vec![coin(2_000_000, JUNO)]))?;
     if text.len() > MAX_TEXT_LENGTH {
         return Err(ContractError::TooMuchText {});
     }
@@ -296,7 +296,7 @@ fn execute_delete_post(
     info: MessageInfo,
     post_id: u64,
 ) -> Result<Response, ContractError> {
-    assert_sent_exact_coin(&info.funds, Some(Coin::new(10_000_000, JUNO)))?;
+    assert_sent_exact_coin(&info.funds, Some(vec![coin(10_000_000, JUNO)]))?;
     let post = POST.may_load(deps.storage, post_id)?;
     match post {
         Some(post) => {
@@ -317,20 +317,21 @@ fn execute_delete_post(
         None => Err(ContractError::PostDoesNotExist {}),
     }
 }
-fn execute_withdraw(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
-    //see if transactor is administrative wallet, fail if not
+fn execute_withdraw_juno(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
+    //verify wallet address is hardcoded admin
     if info.sender != ADMIN {
         return Err(ContractError::Unauthorized {});
     }
-    let balance = deps.querier.query_all_balances(&env.contract.address)?;
+    //go through balances owned by contract and send to ADMIN
+    let balance = deps.querier.query_balance(&env.contract.address, JUNO)?;
     let bank_msg = BankMsg::Send {
         to_address: ADDRESS.to_string(),
-        amount: balance,
+        amount: vec![balance.clone()],
     };
-
     let resp = Response::new()
         .add_message(bank_msg)
-        .add_attribute("action", "withdraw");
+        .add_attribute("action", "withdraw")
+        .add_attribute("amount withdrawn", balance.to_string());
     Ok(resp)
 }
 fn execute_unlock_article(

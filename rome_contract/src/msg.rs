@@ -33,7 +33,7 @@ pub enum ExecuteMsg {
     DeletePost {
         post_id: u64,
     },
-    Withdraw {},
+    WithdrawJuno {},
     UnlockArticle {
         post_id: u64,
     },
