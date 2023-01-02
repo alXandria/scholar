@@ -318,7 +318,11 @@ fn execute_delete_post(
         None => Err(ContractError::PostDoesNotExist {}),
     }
 }
-fn execute_withdraw_juno(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
+fn execute_withdraw_juno(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+) -> Result<Response, ContractError> {
     //verify wallet address is hardcoded admin
     if info.sender != ADMIN {
         return Err(ContractError::Unauthorized {});
