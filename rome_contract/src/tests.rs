@@ -1,6 +1,6 @@
 use crate::contract::{execute, instantiate, migrate, query};
 use crate::msg::{
-    AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg,
+    AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg, ProfileNameResponse, ArticleCountResponse,
 };
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
 use cosmwasm_std::{attr, coin, from_binary, Response};
@@ -569,9 +569,16 @@ fn test_query_post() {
     assert!(res.post.is_some());
     //query nonexistent post
     let msg = QueryMsg::Post { post_id: 78476 };
-    let bin = query(deps.as_ref(), env, msg).unwrap();
+    let bin = query(deps.as_ref(), env.clone(), msg).unwrap();
     let res: PostResponse = from_binary(&bin).unwrap();
     assert!(res.post.is_none());
+    //query article count
+    let msg = QueryMsg::ArticleCount {  };
+    let bin = query(deps.as_ref(), env, msg).unwrap();
+    let res: ArticleCountResponse = from_binary(&bin).unwrap();
+    print!("{:?}", res);
+    //switch number to 2 to fail
+    assert_eq!(1, res.article_count);
 }
 #[test]
 fn test_create_profile() {
@@ -590,7 +597,14 @@ fn test_create_profile() {
         profile_picture: "google.com".to_string(),
         cover_picture: "google.com".to_string(),
     };
-    let _res = execute(deps.as_mut(), env, info, msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //test query profile
+    let msg = QueryMsg::ProfileName { address: ADDR1.to_string() };
+    let bin = query(deps.as_ref(), env, msg).unwrap();
+    let res: ProfileNameResponse = from_binary(&bin).unwrap();
+    print!("{:?}", res);
+    //switch to is_none to fail
+    assert!(res.profile_name.is_some());
 }
 #[test]
 fn test_register_profile_name_fails() {

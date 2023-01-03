@@ -42,5 +42,4 @@ pub const POST: Map<u64, Post> = Map::new("post");
 pub const LAST_POST_ID: Item<u64> = Item::new("last_post_id");
 pub const PROFILE: Map<Addr, Profile> = Map::new("profile");
 pub const PROFILE_LOOKUP: Map<String, Addr> = Map::new("profile_name");
-pub const REVERSE_LOOKUP: Map<Addr, String> = Map::new("lookup_profile_name");
 pub const ARTICLE_COUNT: Item<u64> = Item::new("number_of_articles");

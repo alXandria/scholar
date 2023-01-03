@@ -14,8 +14,7 @@ use crate::msg::{
     ProfileNameResponse, QueryMsg,
 };
 use crate::state::{
-    Config, Post, Profile, ARTICLE_COUNT, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP,
-    REVERSE_LOOKUP,
+    Config, Post, Profile, ARTICLE_COUNT, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP
 };
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
@@ -143,7 +142,6 @@ fn execute_create_profile(
             };
             PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
             PROFILE_LOOKUP.save(deps.storage, formatted_profile_name.clone(), &info.sender)?;
-            REVERSE_LOOKUP.save(deps.storage, info.sender, &formatted_profile_name)?;
             Ok(Response::new())
         }
     }
@@ -407,7 +405,6 @@ fn execute_admin_create_profile(
         formatted_profile_name.clone(),
         &validated_address,
     )?;
-    REVERSE_LOOKUP.save(deps.storage, validated_address, &formatted_profile_name)?;
     Ok(Response::new())
 }
 
@@ -451,8 +448,14 @@ fn query_article_count(deps: Deps, _env: Env) -> StdResult<Binary> {
 }
 fn query_profile_name(deps: Deps, _env: Env, address: String) -> StdResult<Binary> {
     let validated_address = deps.api.addr_validate(&address)?;
-    let profile_name = REVERSE_LOOKUP.may_load(deps.storage, validated_address)?;
-    to_binary(&ProfileNameResponse { profile_name })
+    let profile = PROFILE.may_load(deps.storage, validated_address)?;
+    match profile {
+        Some(profile) => {
+            let profile_name = Some(profile.profile_name);
+            to_binary(&ProfileNameResponse { profile_name })       
+        }
+        None => return Err(StdError::generic_err("No profile found"))
+    }
 }
 #[entry_point]
 pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
