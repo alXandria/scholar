@@ -6,7 +6,7 @@ use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
 use cosmwasm_std::{attr, coin, from_binary, Response};
 
 pub const ADDR1: &str = "juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4";
-pub const ADDR2: &str = "addr2";
+pub const ADDR2: &str = "juno1ggtuwvungvx5t3awqpcqvxxvgt7gvwdkanuwtm";
 
 #[test]
 fn test_instantiate() {
@@ -98,7 +98,8 @@ fn test_execute_admin_create_profile() {
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //register profile
-    let msg = ExecuteMsg::CreateProfile {
+    let msg = ExecuteMsg::AdminCreateProfile {
+        address: ADDR2.to_string(),
         profile_name: "Vitalik".to_string(),
         bio: "This is my bio".to_string(),
         profile_picture: "google.com".to_string(),
