@@ -116,6 +116,19 @@ fn test_execute_create_post_invalid() {
         admin: ADDR1.to_string(),
     };
     let _res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //create profile without a profile
+    let msg = ExecuteMsg::CreatePost {
+        editable: true,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "This will fail".to_string(),
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
     //register profile
     let msg = ExecuteMsg::CreateProfile {
         profile_name: "Vital ik".to_string(),
@@ -135,9 +148,36 @@ fn test_execute_create_post_invalid() {
                 "Governance".to_string(),
                 "Rejected".to_string(),
             ],
-            //text over 500 characters
-            text: "This will fail vdfjkvjdfnksvkndsvjsndjkvnkjfnvnsdjkvnsdfnvjkdfnsvnjdksnvkldsnvjkdfnvjkfdnvkdnfjvkndjsknvjksdnknjfknvjkdsfnjvknskdnvjkndsjkvsjkdnvjksdfnvjksdfnvjkdfsnjvksvndfjkvnjsdkfnvjksdfnvkjlsdfvjnldsfknvjkdsvnjdksjkvcjkdnkm dkfs vkdnjkvndfkjsvjkfdnvjksdfnjkvkdfnvdnskvnsdfvjkdsnvjkdfnvjkdnvjksdnvjkdsvnjkdfnsdvfdknvjksdnvjfkdsnvjkdfsnvjksdnvjkfdsnvjkdsvlnsjknvjkdsnvjksdfnvkndsfjkvnjdskvnksdflvnjdknvjksdnvjkdfsnvjkdsnvjksdnvkdsnvfjkdnvjkdnvjkfndsvkdsfnjvksdnvsdfjklnvjdkslnvjdksnvjdfknvsdfjklnvdjksfnvjkdlsfnvkd".to_string(),
+            text: "This will fail".to_string(),
         };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    //create new post with too long url
+    let msg = ExecuteMsg::CreatePost {
+        editable: true,
+        post_title: "Mintscan Prop 320".to_string(),
+        //wrong URL
+        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "This will fail".to_string(),
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    //create new post with text over 500 characters
+    let msg = ExecuteMsg::CreatePost {
+        editable: true,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        //text over 500 characters
+        text: "This will fail vdfjkvjdfnksvkndsvjsndjkvnkjfnvnsdjkvnsdfnvjkdfnsvnjdksnvkldsnvjkdfnvjkfdnvkdnfjvkndjsknvjksdnknjfknvjkdsfnjvknskdnvjkndsjkvsjkdnvjksdfnvjksdfnvjkdfsnjvksvndfjkvnjsdkfnvjksdfnvkjlsdfvjnldsfknvjkdsvnjdksjkvcjkdnkm dkfs vkdnjkvndfkjsvjkfdnvjksdfnjkvkdfnvdnskvnsdfvjkdsnvjkdfnvjkdnvjksdnvjkdsvnjkdfnsdvfdknvjksdnvjfkdsnvjkdfsnvjksdnvjkfdsnvjkdsvlnsjknvjkdsnvjksdfnvkndsfjkvnjdskvnksdflvnjdknvjksdnvjkdfsnvjkdsnvjksdnvkdsnvfjkdnvjkdnvjkfndsvkdsfnjvksdnvsdfjklnvjdkslnvjdksnvjdfknvsdfjklnvdjksfnvjkdlsfnvkd".to_string(),
+    };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
 #[test]
@@ -273,6 +313,31 @@ fn test_execute_edit_post_invalid() {
     let msg = ExecuteMsg::EditPost {
         post_id: 1,
         external_id: "https://stake.tax/".to_string(),
+        text: "edited post".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
+    // edit post with wrong external ID
+    let info = mock_info(ADDR1, &[coin(2_000_000, "ujunox")]);
+    let msg = ExecuteMsg::EditPost {
+        post_id: 1,
+        external_id: "https://stake.tax/".to_string(),
+        text: "edited post".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    // edit post with too much text
+    let msg = ExecuteMsg::EditPost {
+        post_id: 1,
+        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
+        text: "This will fail vdfjkvjdfnksvkndsvjsndjkvnkjfnvnsdjkvnsdfnvjkdfnsvnjdksnvkldsnvjkdfnvjkfdnvkdnfjvkndjsknvjksdnknjfknvjkdsfnjvknskdnvjkndsjkvsjkdnvjksdfnvjksdfnvjkdfsnjvksvndfjkvnjsdkfnvjksdfnvkjlsdfvjnldsfknvjkdsvnjdksjkvcjkdnkm dkfs vkdnjkvndfkjsvjkfdnvjksdfnjkvkdfnvdnskvnsdfvjkdsnvjkdfnvjkdnvjksdnvjkdsvnjkdfnsdvfdknvjksdnvjfkdsnvjkdfsnvjksdnvjkfdsnvjkdsvlnsjknvjkdsnvjksdfnvkndsfjkvnjdskvnksdflvnjdknvjksdnvjkdfsnvjkdsnvjksdnvkdsnvfjkdnvjkdnvjkfndsvkdsfnjvksdnvsdfjklnvjdkslnvjdksnvjdfknvsdfjklnvdjksfnvjkdlsfnvkd".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    //edit post with too long url
+    let msg = ExecuteMsg::EditPost {
+        post_id: 1,
+        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTQmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTQmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvTQmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
         text: "edited post".to_string(),
         tags: vec!["Tax".to_string(), "Website".to_string()],
     };
