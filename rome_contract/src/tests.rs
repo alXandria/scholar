@@ -341,6 +341,52 @@ fn test_execute_edit_post_invalid() {
         text: "edited post".to_string(),
         tags: vec!["Tax".to_string(), "Website".to_string()],
     };
+    let _err = execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
+    //create uneditable post
+    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let msg = ExecuteMsg::CreatePost {
+        editable: false,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //edit message without profile (fail)
+    let info = mock_info(ADDR2, &[coin(2_000_000, "ujunox")]);
+    let msg = ExecuteMsg::EditPost {
+        post_id: 1,
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        text: "".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    // register profile
+        let msg = ExecuteMsg::CreateProfile {
+            profile_name: "destuct".to_string(),
+            bio: "This is my bio".to_string(),
+            profile_picture: "google.com".to_string(),
+            cover_picture: "google.com".to_string(),
+        };
+        let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    //edit message as non original author (fail)
+    let info = mock_info(ADDR2, &[coin(2_000_000, "ujunox")]);
+    let msg = ExecuteMsg::EditPost {
+        post_id: 2,
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        text: "".to_string(),
+        tags: vec!["Tax".to_string(), "Website".to_string()],
+    };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
 #[test]
