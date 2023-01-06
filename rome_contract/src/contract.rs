@@ -448,14 +448,9 @@ fn query_article_count(deps: Deps, _env: Env) -> StdResult<Binary> {
 }
 fn query_profile_name(deps: Deps, _env: Env, address: String) -> StdResult<Binary> {
     let validated_address = deps.api.addr_validate(&address)?;
-    let profile = PROFILE.may_load(deps.storage, validated_address)?;
-    match profile {
-        Some(profile) => {
-            let profile_name = Some(profile.profile_name);
-            to_binary(&ProfileNameResponse { profile_name })       
-        }
-        None => return Err(StdError::generic_err("No profile found"))
-    }
+    let profile = PROFILE.load(deps.storage, validated_address)?;
+    let profile_name = Some(profile.profile_name);
+    to_binary(&ProfileNameResponse { profile_name })       
 }
 #[entry_point]
 pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {

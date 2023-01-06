@@ -108,6 +108,27 @@ fn test_execute_admin_create_profile() {
     let _res = execute(deps.as_mut(), env, info, msg).unwrap();
 }
 #[test]
+fn test_execute_admin_create_profile_invalid() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+    //instatiate
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //register profile
+    let info = mock_info(ADDR2, &[]);
+    let msg = ExecuteMsg::AdminCreateProfile {
+        address: ADDR2.to_string(),
+        profile_name: "Vitalik".to_string(),
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
+    };
+    let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
+}
+#[test]
 fn test_execute_create_post_invalid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
@@ -472,6 +493,10 @@ fn test_execute_delete_post_invalid() {
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //delete post without updating funds, will fail for incorrect funds
     let msg = ExecuteMsg::DeletePost { post_id: 3 };
+    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    //delete non-existent post
+    let info = mock_info(ADDR1, &[coin(10_000_000, "ujunox")]);
+    let msg = ExecuteMsg::DeletePost { post_id: 4 };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
 #[test]
@@ -795,4 +820,47 @@ fn test_execute_unlock_article() {
     println!("{:?}", res);
     //switch to is_none to intentionally fail and check output to verify editable is true
     assert!(res.post.is_some());
+}
+#[test]
+fn test_execute_unlock_article_invalid() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(ADDR1, &[]);
+    //instatiate
+    let msg = InstantiateMsg {
+        admin: ADDR1.to_string(),
+    };
+    let _res = instantiate(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //switch info to ADDR2 for post creation
+    let info = mock_info(ADDR1, &[]);
+    //register profile
+    let msg = ExecuteMsg::CreateProfile {
+        profile_name: "savage".to_string(),
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //set proper fee in info for post creation
+    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    //create new post
+    let msg = ExecuteMsg::CreatePost {
+        editable: false,
+        post_title: "Mintscan Prop 320".to_string(),
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+
+                .to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "Hi".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
+    //test unlocking
+    let info = mock_info(ADDR2, &[]);
+    let msg = ExecuteMsg::UnlockArticle { post_id: 1 };
+    let _err= execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
 }
