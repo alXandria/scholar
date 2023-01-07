@@ -1,12 +1,15 @@
 use crate::contract::{execute, instantiate, migrate, query};
 use crate::msg::{
-    AllPostsResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse, QueryMsg, ProfileNameResponse, ArticleCountResponse,
+    AllPostsResponse, ArticleCountResponse, ExecuteMsg, InstantiateMsg, MigrateMsg, PostResponse,
+    ProfileNameResponse, QueryMsg,
 };
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
 use cosmwasm_std::{attr, coin, from_binary, Response};
 
 pub const ADDR1: &str = "juno1w5aespcyddns7y696q9wlch4ehflk2wglu9vv4";
 pub const ADDR2: &str = "juno1ggtuwvungvx5t3awqpcqvxxvgt7gvwdkanuwtm";
+
+const JUNO: &str = "ujunox";
 
 #[test]
 fn test_instantiate() {
@@ -70,7 +73,7 @@ fn test_execute_create_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set proper fee in info for post creation
-    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, JUNO)]);
     //create new post
     let msg = ExecuteMsg::CreatePost {
         editable: false,
@@ -141,7 +144,9 @@ fn test_execute_create_post_invalid() {
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
-        external_id: "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
+        external_id:
+            "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
         tags: vec![
             "Blockchain".to_string(),
             "Governance".to_string(),
@@ -160,17 +165,19 @@ fn test_execute_create_post_invalid() {
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //create new post with wrong URL to fail
     let msg = ExecuteMsg::CreatePost {
-            editable: true,
-            post_title: "Mintscan Prop 320".to_string(),
-            //wrong URL
-            external_id: "https://alxandri.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT".to_string(),
-            tags: vec![
-                "Blockchain".to_string(),
-                "Governance".to_string(),
-                "Rejected".to_string(),
-            ],
-            text: "This will fail".to_string(),
-        };
+        editable: true,
+        post_title: "Mintscan Prop 320".to_string(),
+        //wrong URL
+        external_id:
+            "https://alxandri.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
+                .to_string(),
+        tags: vec![
+            "Blockchain".to_string(),
+            "Governance".to_string(),
+            "Rejected".to_string(),
+        ],
+        text: "This will fail".to_string(),
+    };
     let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
     //create new post with too long url
     let msg = ExecuteMsg::CreatePost {
@@ -220,7 +227,7 @@ fn test_execute_edit_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds in info to pay for interaction
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -237,7 +244,7 @@ fn test_execute_edit_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //edit message
-    let info = mock_info(ADDR1, &[coin(2_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(2_000_000, JUNO)]);
     let msg = ExecuteMsg::EditPost {
         post_id: 1,
         external_id:
@@ -267,7 +274,7 @@ fn test_execute_edit_post_author_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds in info to pay for interaction
-    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, JUNO)]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
         editable: false,
@@ -284,7 +291,7 @@ fn test_execute_edit_post_author_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //edit message
-    let info = mock_info(ADDR1, &[coin(2_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(2_000_000, JUNO)]);
     let msg = ExecuteMsg::EditPost {
         post_id: 1,
         external_id:
@@ -314,7 +321,7 @@ fn test_execute_edit_post_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds for post creation
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     //create post
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -339,7 +346,7 @@ fn test_execute_edit_post_invalid() {
     };
     let _err = execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
     // edit post with wrong external ID
-    let info = mock_info(ADDR1, &[coin(2_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(2_000_000, JUNO)]);
     let msg = ExecuteMsg::EditPost {
         post_id: 1,
         external_id: "https://stake.tax/".to_string(),
@@ -364,7 +371,7 @@ fn test_execute_edit_post_invalid() {
     };
     let _err = execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
     //create uneditable post
-    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, JUNO)]);
     let msg = ExecuteMsg::CreatePost {
         editable: false,
         post_title: "Mintscan Prop 320".to_string(),
@@ -378,9 +385,9 @@ fn test_execute_edit_post_invalid() {
         ],
         text: "".to_string(),
     };
-    let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //edit message without profile (fail)
-    let info = mock_info(ADDR2, &[coin(2_000_000, "ujunox")]);
+    let info = mock_info(ADDR2, &[coin(2_000_000, JUNO)]);
     let msg = ExecuteMsg::EditPost {
         post_id: 1,
         external_id:
@@ -391,15 +398,15 @@ fn test_execute_edit_post_invalid() {
     };
     let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
     // register profile
-        let msg = ExecuteMsg::CreateProfile {
-            profile_name: "destuct".to_string(),
-            bio: "This is my bio".to_string(),
-            profile_picture: "google.com".to_string(),
-            cover_picture: "google.com".to_string(),
-        };
-        let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+    let msg = ExecuteMsg::CreateProfile {
+        profile_name: "destuct".to_string(),
+        bio: "This is my bio".to_string(),
+        profile_picture: "google.com".to_string(),
+        cover_picture: "google.com".to_string(),
+    };
+    let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //edit message as non original author (fail)
-    let info = mock_info(ADDR2, &[coin(2_000_000, "ujunox")]);
+    let info = mock_info(ADDR2, &[coin(2_000_000, JUNO)]);
     let msg = ExecuteMsg::EditPost {
         post_id: 2,
         external_id:
@@ -429,7 +436,7 @@ fn test_execute_delete_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set info with funds for article creation
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     //create a post
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -446,7 +453,7 @@ fn test_execute_delete_post_valid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set info for funds for post deletion
-    let info = mock_info(ADDR1, &[coin(10_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(10_000_000, JUNO)]);
     //delete post
     let msg = ExecuteMsg::DeletePost { post_id: 1 };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
@@ -460,7 +467,7 @@ fn test_execute_delete_post_valid() {
 fn test_execute_delete_post_invalid() {
     let mut deps = mock_dependencies();
     let env = mock_env();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     //intantiate
     let msg = InstantiateMsg {
         admin: ADDR1.to_string(),
@@ -475,7 +482,7 @@ fn test_execute_delete_post_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set funds for post creation
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     //create post
     let msg = ExecuteMsg::CreatePost {
         editable: true,
@@ -493,9 +500,9 @@ fn test_execute_delete_post_invalid() {
     let _res = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
     //delete post without updating funds, will fail for incorrect funds
     let msg = ExecuteMsg::DeletePost { post_id: 3 };
-    let _err = execute(deps.as_mut(), env.clone(), info.clone(), msg).unwrap_err();
+    let _err = execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
     //delete non-existent post
-    let info = mock_info(ADDR1, &[coin(10_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(10_000_000, JUNO)]);
     let msg = ExecuteMsg::DeletePost { post_id: 4 };
     let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
@@ -518,7 +525,7 @@ fn test_execute_delete_post_uneditable() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set info for proper funds to create a post that is uneditable
-    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, JUNO)]);
     //create a post that is uneditable
     let msg = ExecuteMsg::CreatePost {
         editable: false,
@@ -535,7 +542,7 @@ fn test_execute_delete_post_uneditable() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //attempt to delete message by non-original-author (fail)
-    let info = mock_info(ADDR2, &[coin(10_000_000, "ujunox")]);
+    let info = mock_info(ADDR2, &[coin(10_000_000, JUNO)]);
     let msg = ExecuteMsg::DeletePost { post_id: 1 };
     let _res = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }
@@ -557,7 +564,7 @@ fn test_withdraw_valid() {
         cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
@@ -593,7 +600,7 @@ fn test_withdraw_invalid() {
         cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
@@ -630,7 +637,7 @@ fn test_query_all_posts() {
         cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
@@ -683,7 +690,7 @@ fn test_query_post() {
         cover_picture: "google.com".to_string(),
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let info = mock_info(ADDR1, &[coin(1_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(1_000_000, JUNO)]);
     let msg = ExecuteMsg::CreatePost {
         editable: true,
         post_title: "Mintscan Prop 320".to_string(),
@@ -709,7 +716,7 @@ fn test_query_post() {
     let res: PostResponse = from_binary(&bin).unwrap();
     assert!(res.post.is_none());
     //query article count
-    let msg = QueryMsg::ArticleCount {  };
+    let msg = QueryMsg::ArticleCount {};
     let bin = query(deps.as_ref(), env, msg).unwrap();
     let res: ArticleCountResponse = from_binary(&bin).unwrap();
     print!("{:?}", res);
@@ -735,7 +742,9 @@ fn test_create_profile() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //test query profile
-    let msg = QueryMsg::ProfileName { address: ADDR1.to_string() };
+    let msg = QueryMsg::ProfileName {
+        address: ADDR1.to_string(),
+    };
     let bin = query(deps.as_ref(), env, msg).unwrap();
     let res: ProfileNameResponse = from_binary(&bin).unwrap();
     print!("{:?}", res);
@@ -793,7 +802,7 @@ fn test_execute_unlock_article() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set proper fee in info for post creation
-    let info = mock_info(ADDR2, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR2, &[coin(5_000_000, JUNO)]);
     //create new post
     let msg = ExecuteMsg::CreatePost {
         editable: false,
@@ -842,14 +851,13 @@ fn test_execute_unlock_article_invalid() {
     };
     let _res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
     //set proper fee in info for post creation
-    let info = mock_info(ADDR1, &[coin(5_000_000, "ujunox")]);
+    let info = mock_info(ADDR1, &[coin(5_000_000, JUNO)]);
     //create new post
     let msg = ExecuteMsg::CreatePost {
         editable: false,
         post_title: "Mintscan Prop 320".to_string(),
         external_id:
             "https://alxandria.infura-ipfs.io/ipfs/QmQSXMeJRyodyVESWVXT8gd7kQhjrV7sguLnsrXSd6YzvT"
-
                 .to_string(),
         tags: vec![
             "Blockchain".to_string(),
@@ -862,5 +870,5 @@ fn test_execute_unlock_article_invalid() {
     //test unlocking
     let info = mock_info(ADDR2, &[]);
     let msg = ExecuteMsg::UnlockArticle { post_id: 1 };
-    let _err= execute(deps.as_mut(), env.clone(), info, msg).unwrap_err();
+    let _err = execute(deps.as_mut(), env, info, msg).unwrap_err();
 }

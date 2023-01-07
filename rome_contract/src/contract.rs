@@ -14,7 +14,7 @@ use crate::msg::{
     ProfileNameResponse, QueryMsg,
 };
 use crate::state::{
-    Config, Post, Profile, ARTICLE_COUNT, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP
+    Config, Post, Profile, ARTICLE_COUNT, CONFIG, LAST_POST_ID, POST, PROFILE, PROFILE_LOOKUP,
 };
 
 const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
@@ -141,7 +141,7 @@ fn execute_create_profile(
                 cover_picture,
             };
             PROFILE.save(deps.storage, info.sender.clone(), &new_profile)?;
-            PROFILE_LOOKUP.save(deps.storage, formatted_profile_name.clone(), &info.sender)?;
+            PROFILE_LOOKUP.save(deps.storage, formatted_profile_name, &info.sender)?;
             Ok(Response::new())
         }
     }
@@ -337,7 +337,7 @@ fn execute_withdraw_juno(
         return Err(ContractError::Unauthorized {});
     }
     //go through balances owned by contract and send to ADMIN
-    let balance = deps.querier.query_balance(&env.contract.address, JUNO)?;
+    let balance = deps.querier.query_balance(env.contract.address, JUNO)?;
     let bank_msg = BankMsg::Send {
         to_address: ADDRESS.to_string(),
         amount: vec![balance.clone()],
@@ -400,11 +400,7 @@ fn execute_admin_create_profile(
         cover_picture,
     };
     PROFILE.save(deps.storage, validated_address.clone(), &new_profile)?;
-    PROFILE_LOOKUP.save(
-        deps.storage,
-        formatted_profile_name.clone(),
-        &validated_address,
-    )?;
+    PROFILE_LOOKUP.save(deps.storage, formatted_profile_name, &validated_address)?;
     Ok(Response::new())
 }
 
@@ -450,7 +446,7 @@ fn query_profile_name(deps: Deps, _env: Env, address: String) -> StdResult<Binar
     let validated_address = deps.api.addr_validate(&address)?;
     let profile = PROFILE.load(deps.storage, validated_address)?;
     let profile_name = Some(profile.profile_name);
-    to_binary(&ProfileNameResponse { profile_name })       
+    to_binary(&ProfileNameResponse { profile_name })
 }
 #[entry_point]
 pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
